@@ -22,6 +22,7 @@ typedef void (^RGFlipMenuActionBlock)(id me);
 
 @property (nonatomic, readonly) RGFlipMenuView *menuView;
 @property (nonatomic, copy) NSString *menuText;
+@property (nonatomic, assign, getter=isClosed) BOOL closed;
 
 // instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds;

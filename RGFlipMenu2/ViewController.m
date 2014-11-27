@@ -48,7 +48,6 @@
     [super viewWillLayoutSubviews];
     
     self.flipMenu.menuView.frame = self.view.frame;
-    [self.flipMenu.menuView setNeedsLayout];
 }
 
 @end

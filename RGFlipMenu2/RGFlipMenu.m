@@ -12,14 +12,13 @@
 @interface RGFlipMenu ()
 
 @property (nonatomic, strong) NSArray *subMenus;
-@property (nonatomic, assign, getter=isClosed) BOOL closed;
 @property (nonatomic, weak) RGFlipMenu *superMenu;
 @property (nonatomic, copy) RGFlipMenuActionBlock actionBlock;
 @property (nonatomic, strong) RGFlipMenuView *menuView;
 
 @end
 
-#define kRGAnimationDuration 0.5f
+#define kRGAnimationDuration 0.6f
 
 
 @implementation RGFlipMenu
@@ -28,7 +27,7 @@
 
 // instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
-
+    
     return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText];
 }
 
@@ -39,7 +38,7 @@
 }
 
 
-# pragma mark - Accessors 
+# pragma mark - Accessors
 
 - (RGFlipMenuView *)menuView {
     if (!_menuView) {
@@ -55,64 +54,43 @@
 
 - (void)didTapMenu:(id)sender {
     
+    self.closed = !self.isClosed;
+    
+    
+    // move up and hide or show submenus
+    [self.menuView setNeedsLayout];
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [self.menuView repositionSubviews];
+    
+    } completion:^(BOOL finished) {
+    }];
+    
+    // hide label -> once the 'backside' of the view is shown, it will be hidden
+    if (self.closed) {
+        [self.menuView hideMenuLabel];
+    } else {
+        [self.menuView showMenuLabel];
+    }
 
-    // flip menu ...
-    [UIView transitionWithView:self.menuView
-                      duration:0.5f
+    // flip menu
+    [UIView transitionWithView:self.menuView.menuWrapperView.subviews[0]
+                      duration:kRGAnimationDuration/2.f
                        options: (isLandscape ?
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
-                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                     animations:^{
-                        [self positionMenuView:self.menuView wasClosed:self.isClosed];
-                    } completion:^(BOOL finished) {
-                        self.closed = !self.isClosed;
-                    }];
-
-    // ... move up and hide or show submenus
-    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.1f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction animations:^{
-        [self positionSubviewsWithMenuClosed:YES];
-    } completion:nil];
-    
-
+                        
+                    } completion:nil];
 }
 
 
 # pragma mark - Private
 
-- (void)positionMenuView:(RGFlipMenuView *)theMenuView wasClosed:(BOOL)wasClosed {
-    NSLog(@"%s: rect=%@", __FUNCTION__, self.menuView);
-
-    if (wasClosed) {
-        if (isLandscape) {
-//            theMenuView.center = CGPointMake(CGRectGetWidth(self.menuBounds)*0.2f, self.menuBounds.origin.y);
-        } else {
-//            theMenuView.center = CGPointMake(self.menuBounds., CGRectGetWidth(self.menuBounds)*0.2f);
-        }
-    } else {
-        theMenuView.transform = CGAffineTransformIdentity;
-    }
-}
-
-- (void)positionSubviewsWithMenuClosed:(BOOL)wasMenuClosed {
-    
-    if (wasMenuClosed) {
-        // menu was close whan user tapped -> show submenus
-        
-    } else {
-        
-        // hide submenus
-        [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
-            NSLog(@"subMenuView=%@", subMenu.menuView);
-        }];
-    }
-}
-
-
 # pragma mark - Initializer - Private
 
 - (instancetype)initWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText {
-
+    
     self = [super init];
     if (self) {
         _subMenus = theSubMenus;
