@@ -15,7 +15,6 @@
 @property (nonatomic, assign, getter=isClosed) BOOL closed;
 @property (nonatomic, weak) RGFlipMenu *superMenu;
 @property (nonatomic, copy) RGFlipMenuActionBlock actionBlock;
-@property (nonatomic, assign) CGRect menuBounds;
 @property (nonatomic, strong) RGFlipMenuView *menuView;
 
 @end
@@ -30,13 +29,13 @@
 // instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
 
-    return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText menuBounds:theMenuBounds];
+    return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText];
 }
 
 // instance as leaf (no submenus) but action block instead
 + (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
     
-    return [[RGFlipMenu alloc] initWithSubMenus:nil superMenu:theSuperMenu actionBlock:theActionBlock menuText:theMenuText menuBounds:theMenuBounds];
+    return [[RGFlipMenu alloc] initWithSubMenus:nil superMenu:theSuperMenu actionBlock:theActionBlock menuText:theMenuText];
 }
 
 
@@ -45,17 +44,17 @@
 - (RGFlipMenuView *)menuView {
     if (!_menuView) {
         _menuView = [[RGFlipMenuView alloc] initWithFlipMenu:self];
-        _menuView.frame = self.menuBounds;
     }
     return _menuView;
 }
+
+#define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
 
 
 # pragma mark - User Action
 
 - (void)didTapMenu:(id)sender {
     
-    BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
 
     // flip menu ...
     [UIView transitionWithView:self.menuView
@@ -82,8 +81,14 @@
 # pragma mark - Private
 
 - (void)positionMenuView:(RGFlipMenuView *)theMenuView wasClosed:(BOOL)wasClosed {
+    NSLog(@"%s: rect=%@", __FUNCTION__, self.menuView);
+
     if (wasClosed) {
-        theMenuView.transform = CGAffineTransformMakeTranslation(0, -300);
+        if (isLandscape) {
+//            theMenuView.center = CGPointMake(CGRectGetWidth(self.menuBounds)*0.2f, self.menuBounds.origin.y);
+        } else {
+//            theMenuView.center = CGPointMake(self.menuBounds., CGRectGetWidth(self.menuBounds)*0.2f);
+        }
     } else {
         theMenuView.transform = CGAffineTransformIdentity;
     }
@@ -106,7 +111,7 @@
 
 # pragma mark - Initializer - Private
 
-- (instancetype)initWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
+- (instancetype)initWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText {
 
     self = [super init];
     if (self) {
@@ -114,7 +119,6 @@
         _superMenu = theSuperMenu;
         _actionBlock = theActionBlock;
         _menuText =theMenuText;
-        _menuBounds = theMenuBounds;
         _closed = YES;
     }
     return self;

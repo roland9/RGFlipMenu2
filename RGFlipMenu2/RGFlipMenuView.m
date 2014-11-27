@@ -42,6 +42,7 @@
     return self;
 }
 
+
 - (void)didTapMenu:(id)sender {
     NSAssert([sender isKindOfClass:[UITapGestureRecognizer class]], @"inconsistent");
     NSLog(@"bla");
@@ -49,7 +50,10 @@
     [self.flipMenu didTapMenu:self];
 }
 
+
 - (void)layoutSubviews {
+    [super layoutSubviews];
+    
     self.menuBackground.center = self.center;
     self.menuBackground.bounds = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
     self.menuLabel.bounds = self.menuBackground.bounds;
