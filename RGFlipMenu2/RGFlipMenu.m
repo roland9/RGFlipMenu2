@@ -20,8 +20,12 @@
 
 @end
 
+#define kRGAnimationDuration 0.5f
+
 
 @implementation RGFlipMenu
+
+# pragma mark - Public Factories
 
 // instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
@@ -36,6 +40,8 @@
 }
 
 
+# pragma mark - Accessors 
+
 - (RGFlipMenuView *)menuView {
     if (!_menuView) {
         _menuView = [[RGFlipMenuView alloc] initWithFlipMenu:self];
@@ -45,26 +51,52 @@
 }
 
 
+# pragma mark - User Action
+
 - (void)didTapMenu:(id)sender {
     
-    // flip
+    BOOL isLandscape = UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
+
+    // flip menu ...
     [UIView transitionWithView:self.menuView
                       duration:0.5f
-                       options: //(isLandscape ?
-                                (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) // :
-//                                (mainMenu.isMenuClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
-//                                ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
+                       options: (isLandscape ?
+                                 (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
+                                 (self.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
+                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction
                     animations:^{
+                        [self positionMenuView:self.menuView wasClosed:self.isClosed];
                     } completion:^(BOOL finished) {
                         self.closed = !self.isClosed;
                     }];
 
-    if (self.isClosed) {
-        // hide submenus
+    // ... move up and hide or show submenus
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.1f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction animations:^{
+        [self positionSubviewsWithMenuClosed:YES];
+    } completion:nil];
+    
+
+}
+
+
+# pragma mark - Private
+
+- (void)positionMenuView:(RGFlipMenuView *)theMenuView wasClosed:(BOOL)wasClosed {
+    if (wasClosed) {
+        theMenuView.transform = CGAffineTransformMakeTranslation(0, -300);
+    } else {
+        theMenuView.transform = CGAffineTransformIdentity;
+    }
+}
+
+- (void)positionSubviewsWithMenuClosed:(BOOL)wasMenuClosed {
+    
+    if (wasMenuClosed) {
+        // menu was close whan user tapped -> show submenus
         
     } else {
         
-        // show submenus
+        // hide submenus
         [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
             NSLog(@"subMenuView=%@", subMenu.menuView);
         }];
@@ -72,7 +104,7 @@
 }
 
 
-# pragma mark - Private
+# pragma mark - Initializer - Private
 
 - (instancetype)initWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
 
@@ -83,6 +115,7 @@
         _actionBlock = theActionBlock;
         _menuText =theMenuText;
         _menuBounds = theMenuBounds;
+        _closed = YES;
     }
     return self;
 }
