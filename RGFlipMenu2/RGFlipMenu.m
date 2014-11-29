@@ -45,6 +45,17 @@
     return _menuView;
 }
 
+- (void)setHideToShowSibling:(BOOL)hideToShowSibling {
+    _hideToShowSibling = hideToShowSibling;
+    self.menuView.alpha = hideToShowSibling ? 0.f : 1.f;
+    
+#warning todoRG maybe here I should move it off the screen - so we can animate them in again when closing the submenu?
+//    if (hideToShowSibling) {
+//        self.menuView.center = CGPointMake(10, 10);
+//    }
+}
+
+
 #define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
 #define kRGFlipMenuBackScale 0.6f
 
@@ -55,10 +66,18 @@
     
     self.closed = !self.isClosed;
     
+    if (self.superMenu) {
+        if (!self.isClosed) {
+            [self.superMenu hideAndResizeToShowSubMenu:self];
+        } else {
+            [self.superMenu showAndResizeWithSubMenuToBeClosed:self];
+        }
+    }
     
     // move up and hide or show submenus
-//    [self.menuView setNeedsLayout];
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [self closeAllSubMenus];
+        
         [self.menuView repositionSubViews];
         
     } completion:^(BOOL finished) {
@@ -70,7 +89,7 @@
     } else {
         [self.menuView hideMenuLabel];
     }
-
+    
     // flip menu
     [UIView transitionWithView:self.menuView.menuWrapperView
                       duration:kRGAnimationDuration/3.f
@@ -86,11 +105,55 @@
                             self.menuView.menuWrapperView.transform = CGAffineTransformMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale);
                         
                     } completion:nil];
-    
 }
 
 
+- (void)hideAndResizeToShowSubMenu:(RGFlipMenu *)theSubMenuToShow {
+    
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+
+        [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+            subMenu.hideToShowSibling = (subMenu!=theSubMenuToShow);
+        }];
+        
+        // hide the back button from parent menu
+        self.menuView.menuWrapperView.alpha = 0.f;
+        
+//        [theSubMenuToShow.menuView setNeedsLayout];
+        // set frame to force layout again - why does setneedslayout not work here?
+        theSubMenuToShow.menuView.frame = CGRectMake(0, 0, 320, 320);
+        
+    } completion:nil];
+}
+
+
+- (void)showAndResizeWithSubMenuToBeClosed:(RGFlipMenu *)theSubMenuToBeClosed {
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+
+        [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+            subMenu.hideToShowSibling = NO;
+        }];
+        
+        // show the back button from parent menu
+        self.menuView.menuWrapperView.alpha = 1.f;
+
+        theSubMenuToBeClosed.menuView.frame = CGRectMake(0, 0, 320, 320);
+        
+    } completion:nil];
+}
+
 # pragma mark - Private
+
+- (void)closeAllSubMenus {
+    [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        if (!subMenu.isClosed) {
+            [subMenu didTapMenu:self];
+        }
+        if (subMenu.isHiddenToShowSibling) {
+            subMenu.hideToShowSibling = NO;
+        }
+    }];
+}
 
 # pragma mark - Initializer - Private
 
