@@ -11,8 +11,6 @@
 
 @interface RGFlipMenu ()
 
-@property (nonatomic, strong) NSArray *subMenus;
-@property (nonatomic, weak) RGFlipMenu *superMenu;
 @property (nonatomic, copy) RGFlipMenuActionBlock actionBlock;
 @property (nonatomic, strong) RGFlipMenuView *menuView;
 
@@ -59,9 +57,9 @@
     
     
     // move up and hide or show submenus
-    [self.menuView setNeedsLayout];
+//    [self.menuView setNeedsLayout];
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
-        [self.menuView repositionSubviews];
+        [self.menuView repositionSubViews];
         
     } completion:^(BOOL finished) {
     }];
@@ -88,6 +86,7 @@
                             self.menuView.menuWrapperView.transform = CGAffineTransformMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale);
                         
                     } completion:nil];
+    
 }
 
 

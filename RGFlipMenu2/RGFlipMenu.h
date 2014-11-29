@@ -20,6 +20,8 @@ typedef void (^RGFlipMenuActionBlock)(id me);
 
 @interface RGFlipMenu : NSObject <RGFlipMenuTapProtocol>
 
+@property (nonatomic, weak) RGFlipMenu *superMenu;
+@property (nonatomic, strong) NSArray *subMenus;
 @property (nonatomic, readonly) RGFlipMenuView *menuView;
 @property (nonatomic, copy) NSString *menuText;
 @property (nonatomic, assign, getter=isClosed) BOOL closed;
