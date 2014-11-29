@@ -18,7 +18,7 @@
 
 @end
 
-#define kRGAnimationDuration 0.6f
+#define kRGAnimationDuration 0.9f
 
 
 @implementation RGFlipMenu
@@ -73,8 +73,8 @@
     }
 
     // flip menu
-    [UIView transitionWithView:self.menuView.menuWrapperView.subviews[0]
-                      duration:kRGAnimationDuration/2.f
+    [UIView transitionWithView:self.menuView.menuWrapperView
+                      duration:kRGAnimationDuration/4.f
                        options: (isLandscape ?
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
