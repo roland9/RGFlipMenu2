@@ -23,13 +23,13 @@
 
 # pragma mark - Public Factories
 
-// instance with sub menus
+// create instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
     
     return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText];
 }
 
-// instance as leaf (no submenus) but action block instead
+// create instance as leaf (no submenus) but action block instead
 + (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
     
     return [[RGFlipMenu alloc] initWithSubMenus:nil superMenu:theSuperMenu actionBlock:theActionBlock menuText:theMenuText];
@@ -50,9 +50,11 @@
     self.menuView.alpha = hideToShowSibling ? 0.f : 1.f;
     
 #warning todoRG maybe here I should move it off the screen - so we can animate them in again when closing the submenu?
-//    if (hideToShowSibling) {
-//        self.menuView.center = CGPointMake(10, 10);
-//    }
+    if (hideToShowSibling) {
+        self.menuView.layer.transform = CATransform3DMakeScale(0.1f, 0.1f, 0.1f);
+    } else {
+        self.menuView.layer.transform = CATransform3DIdentity;
+    }
 }
 
 
@@ -63,6 +65,22 @@
 # pragma mark - User Action
 
 - (void)didTapMenu:(id)sender {
+    
+    if (self.actionBlock) {
+        self.actionBlock(self);
+    }
+    
+    if (!self.subMenus) {
+        [UIView animateWithDuration:0.2f animations:^{
+            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+        } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.2f animations:^{
+                self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+            } completion:^(BOOL finished) {
+            }];
+        }];
+        return;
+    }
     
     self.closed = !self.isClosed;
     
@@ -100,9 +118,9 @@
                     animations:^{
                         
                         if (self.closed)
-                            self.menuView.menuWrapperView.transform = CGAffineTransformIdentity;
+                            self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
                         else
-                            self.menuView.menuWrapperView.transform = CGAffineTransformMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale);
+                            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale, kRGFlipMenuBackScale);
                         
                     } completion:nil];
 }

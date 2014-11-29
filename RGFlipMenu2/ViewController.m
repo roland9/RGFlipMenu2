@@ -104,12 +104,10 @@
     
     NSArray *subMenus = @[
                           [RGFlipMenu createWithActionBlock:^(id me) {
-                              //
-                          } superMenu:self.flipMenu menuText:@"Option 1" menuBounds:self.view.bounds],
+                              NSLog(@"ping");
+                          } superMenu:self.flipMenu menuText:@"Tap\nOnly" menuBounds:self.view.bounds],
 
-                          [RGFlipMenu createWithActionBlock:^(id me) {
-                              //
-                          } superMenu:self.flipMenu menuText:@"Option 2" menuBounds:self.view.bounds],
+                          [RGFlipMenu createWithSubMenus:subSubMenus2 superMenu:self.flipMenu menuText:@"Options 2" menuBounds:self.view.bounds],
                           
                           [RGFlipMenu createWithActionBlock:^(id me) {
                               //
@@ -133,7 +131,6 @@
                           ];
     
     self.flipMenu.subMenus = subMenus;
-    ((RGFlipMenu *)self.flipMenu.subMenus[0]).subMenus = subSubMenus1;
     ((RGFlipMenu *)self.flipMenu.subMenus[1]).subMenus = subSubMenus2;
     ((RGFlipMenu *)self.flipMenu.subMenus[2]).subMenus = subSubMenus3;
     ((RGFlipMenu *)self.flipMenu.subMenus[3]).subMenus = subSubMenus4;

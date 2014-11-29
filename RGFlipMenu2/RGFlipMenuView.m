@@ -162,9 +162,11 @@
     if (self.flipMenu.isClosed) {
         // menu was opened when user tapped -> move to center again
         newCenter = self.center;
-        subMenu.menuView.menuWrapperView.transform = CGAffineTransformMakeScale(0.2f, 0.2f);
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
         
     } else {
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+        
         // menu was closed when user tapped -> depending on device orientation, move up or left
         
         if (isLandscape) {
@@ -181,7 +183,7 @@
         
         if (subMenu.isClosed) {
             newCenter = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];
-            subMenu.menuView.menuWrapperView.transform = CGAffineTransformIdentity;
+            subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
         }
     }
     
