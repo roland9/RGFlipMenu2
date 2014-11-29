@@ -48,6 +48,7 @@
 }
 
 #define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
+#define kRGFlipMenuBackScale 0.6f
 
 
 # pragma mark - User Action
@@ -61,25 +62,30 @@
     [self.menuView setNeedsLayout];
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
         [self.menuView repositionSubviews];
-    
+        
     } completion:^(BOOL finished) {
     }];
     
     // hide label -> once the 'backside' of the view is shown, it will be hidden
     if (self.closed) {
-        [self.menuView hideMenuLabel];
-    } else {
         [self.menuView showMenuLabel];
+    } else {
+        [self.menuView hideMenuLabel];
     }
 
     // flip menu
     [UIView transitionWithView:self.menuView.menuWrapperView
-                      duration:kRGAnimationDuration/4.f
+                      duration:kRGAnimationDuration/3.f
                        options: (isLandscape ?
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
                                  (self.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
                                  ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
                     animations:^{
+                        
+                        if (self.closed)
+                            self.menuView.menuWrapperView.transform = CGAffineTransformIdentity;
+                        else
+                            self.menuView.menuWrapperView.transform = CGAffineTransformMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale);
                         
                     } completion:nil];
 }

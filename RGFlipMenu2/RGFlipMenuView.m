@@ -10,8 +10,11 @@
 #import "FrameAccessor.h"
 
 
-#define kRGFlipMenuWidth    180
-#define kRGFlipMenuHeight   180
+#define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
+#define kRGFlipMenuWidth    120
+#define kRGFlipMenuHeight   120
+#define kRGFlipMenuPadding  30.f
+
 
 @interface RGFlipMenuView ()
 
@@ -29,6 +32,7 @@
     if (self) {
         _flipMenu = theFlipMenu;
         _menuWrapperView = [[UIView alloc] init];
+//        _menuWrapperView.backgroundColor = [[UIColor brownColor] colorWithAlphaComponent:.2f];
         [self addSubview:_menuWrapperView];
         
         _menuFrontLabel = [[UILabel alloc] init];
@@ -51,6 +55,8 @@
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapMenu:)];
         [_menuWrapperView addGestureRecognizer:tap];
         
+//        self.menuWrapperView.transform = CGAffineTransformMakeScale(0.4, 0.4);
+
     }
     return self;
 }
@@ -79,8 +85,6 @@
 }
 
 
-#define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
-
 - (void)repositionSubviews {
     NSLog(@"%s", __FUNCTION__);
     
@@ -91,21 +95,20 @@
         newCenter = self.center;
 
     } else {
-        // menu was closed when user tapped -> depending on orientation, move up or left
+        // menu was closed when user tapped -> depending on device orientation, move up or left
         if (isLandscape) {
-            // landscape -> left
-            newCenter = CGPointMake(self.width*0.3f, self.centerY);
+            // landscape -> move left
+            newCenter = CGPointMake(CGRectGetWidth(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding, self.centerY);
 
         } else {
-            // portrait -> up
-            newCenter = CGPointMake(self.centerX, self.height*0.1f);
+            // portrait -> move up
+            newCenter = CGPointMake(self.centerX, CGRectGetHeight(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding);
         }
-
     }
 
     self.menuWrapperView.center = newCenter;
 
-    self.menuFrontLabel.center = CGPointMake(self.menuWrapperView.centerX, CGRectGetHeight(self.menuWrapperView.bounds)/2.f);
+    self.menuFrontLabel.center = [self convertPoint:self.menuWrapperView.center toView:self.menuWrapperView];
     self.menuBackLabel.center = self.menuFrontLabel.center;
 }
 
@@ -113,9 +116,11 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     
-    self.menuWrapperView.bounds = CGRectInset(self.bounds, 20, 20);
-    self.menuFrontLabel.bounds = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
-    self.menuBackLabel.bounds = self.menuFrontLabel.bounds;
+    self.menuWrapperView.frame = CGRectInset(self.frame, 20, 20);
+    self.menuFrontLabel.width = kRGFlipMenuWidth;
+    self.menuFrontLabel.height = kRGFlipMenuHeight;
+    self.menuBackLabel.width = kRGFlipMenuWidth;
+    self.menuBackLabel.height = kRGFlipMenuHeight;
     
     [self repositionSubviews];
 }
