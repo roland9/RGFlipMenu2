@@ -8,6 +8,7 @@
 
 #import "RGFlipMenuView.h"
 #import "FrameAccessor.h"
+//#import "RGFlipMenuColors.h"
 
 
 #define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
@@ -34,6 +35,7 @@
 - (instancetype)initWithFlipMenu:(RGFlipMenu *)theFlipMenu {
     self = [super init];
     if (self) {
+        
         //        self.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.2f];
         _flipMenu = theFlipMenu;
         
@@ -55,18 +57,30 @@
         _menuFrontLabel = [[UILabel alloc] init];
         _menuFrontLabel.font = [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
         _menuFrontLabel.textAlignment = NSTextAlignmentCenter;
-        _menuFrontLabel.backgroundColor = [UIColor blueColor];
         _menuFrontLabel.text = theFlipMenu.menuText;
+        _menuFrontLabel.numberOfLines = 2;
+        _menuFrontLabel.layer.cornerRadius = 5.f;
+        _menuFrontLabel.layer.masksToBounds = YES;
         [_menuWrapperView addSubview:_menuFrontLabel];
         
         _menuBackLabel = [[UILabel alloc] init];
         _menuBackLabel.font = [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
         _menuBackLabel.textAlignment = NSTextAlignmentCenter;
-        _menuBackLabel.backgroundColor = [[UIColor blueColor] colorWithAlphaComponent:0.8f];
         _menuBackLabel.text = @"Back";
+        _menuBackLabel.numberOfLines = 2;
         _menuBackLabel.userInteractionEnabled = NO;
+        _menuBackLabel.layer.cornerRadius = 5.f;
+        _menuBackLabel.layer.masksToBounds = YES;
         [_menuWrapperView addSubview:_menuBackLabel];
         
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+        _menuFrontLabel.backgroundColor = [[self colorClass] performSelector:@selector(frontColor)];
+        _menuFrontLabel.textColor = [[self colorClass] performSelector:@selector(frontTextColor)];
+        _menuBackLabel.backgroundColor = [[self colorClass] performSelector:@selector(backColor)];
+        _menuBackLabel.textColor = [[self colorClass] performSelector:@selector(backTextColor)];
+#pragma clang diagnostic pop
+
         _menuBackLabel.alpha = 0.f;
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapMenu:)];
@@ -141,6 +155,10 @@
 
 
 # pragma mark - Private
+
+- (Class)colorClass {
+    return [self.flipMenu.rgFlipMenuColorClass class] ?: [self.flipMenu.superMenu.rgFlipMenuColorClass class];
+}
 
 - (void)repositionSubMenus {
     [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {

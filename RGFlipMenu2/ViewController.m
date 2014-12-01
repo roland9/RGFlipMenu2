@@ -22,18 +22,8 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     self.flipMenu = [RGFlipMenu createWithSubMenus:nil superMenu:nil menuText:@"Main Menu" menuBounds:self.view.bounds];
+    self.flipMenu.rgFlipMenuColorClass = NSClassFromString(@"RGFlipMenuColors");
 
-    NSArray *subSubMenus1 = @[
-                             [RGFlipMenu createWithActionBlock:^(id me) {
-                                 //
-                             } superMenu:self.flipMenu menuText:@"Suboption 1" menuBounds:self.view.bounds],
-                             [RGFlipMenu createWithActionBlock:^(id me) {
-                                 //
-                             } superMenu:self.flipMenu menuText:@"Suboption 2" menuBounds:self.view.bounds],
-                             [RGFlipMenu createWithActionBlock:^(id me) {
-                                 //
-                             } superMenu:self.flipMenu menuText:@"Suboption 3" menuBounds:self.view.bounds],
-                             ];
     NSArray *subSubMenus2 = @[
                               [RGFlipMenu createWithActionBlock:^(id me) {
                                   //

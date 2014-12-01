@@ -18,6 +18,7 @@
 		234894EA1A2691A50009A0F5 /* RGFlipMenu.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894E81A2691A50009A0F5 /* RGFlipMenu.m */; };
 		234894ED1A2695120009A0F5 /* RGFlipMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894EC1A2695120009A0F5 /* RGFlipMenuView.m */; };
 		234894EE1A2695120009A0F5 /* RGFlipMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894EC1A2695120009A0F5 /* RGFlipMenuView.m */; };
+		2357C1281A2D192E00F809F3 /* RGFlipMenuColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 2357C1271A2D192E00F809F3 /* RGFlipMenuColors.m */; };
 		EA0A0BC78A0DEE185526A3C7 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DD150895487C7BF6F886C36F /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +50,8 @@
 		234894E81A2691A50009A0F5 /* RGFlipMenu.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RGFlipMenu.m; sourceTree = "<group>"; };
 		234894EB1A2695120009A0F5 /* RGFlipMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RGFlipMenuView.h; sourceTree = "<group>"; };
 		234894EC1A2695120009A0F5 /* RGFlipMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RGFlipMenuView.m; sourceTree = "<group>"; };
+		2357C1261A2D192E00F809F3 /* RGFlipMenuColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RGFlipMenuColors.h; sourceTree = "<group>"; };
+		2357C1271A2D192E00F809F3 /* RGFlipMenuColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RGFlipMenuColors.m; sourceTree = "<group>"; };
 		404D839C25D6ACE8FBDD4833 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 		6AE4C6D3F3C41421860B178B /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		DD150895487C7BF6F886C36F /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -112,6 +115,8 @@
 				234894E81A2691A50009A0F5 /* RGFlipMenu.m */,
 				234894EB1A2695120009A0F5 /* RGFlipMenuView.h */,
 				234894EC1A2695120009A0F5 /* RGFlipMenuView.m */,
+				2357C1261A2D192E00F809F3 /* RGFlipMenuColors.h */,
+				2357C1271A2D192E00F809F3 /* RGFlipMenuColors.m */,
 				234894CB1A2691730009A0F5 /* Main.storyboard */,
 				234894CE1A2691730009A0F5 /* Images.xcassets */,
 				234894D01A2691730009A0F5 /* LaunchScreen.xib */,
@@ -294,6 +299,7 @@
 				234894CA1A2691730009A0F5 /* ViewController.m in Sources */,
 				234894C71A2691730009A0F5 /* AppDelegate.m in Sources */,
 				234894C41A2691730009A0F5 /* main.m in Sources */,
+				2357C1281A2D192E00F809F3 /* RGFlipMenuColors.m in Sources */,
 				234894ED1A2695120009A0F5 /* RGFlipMenuView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

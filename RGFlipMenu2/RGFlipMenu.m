@@ -16,7 +16,7 @@
 
 @end
 
-#define kRGAnimationDuration 0.9f
+#define kRGAnimationDuration 0.7f
 
 
 @implementation RGFlipMenu
