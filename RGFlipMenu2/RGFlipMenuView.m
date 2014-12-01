@@ -40,7 +40,7 @@
         _flipMenu = theFlipMenu;
         
         _subMenuContainerView = [UIView new];
-        //        _subMenuContainerView.backgroundColor = [[UIColor brownColor] colorWithAlphaComponent:0.2f];
+        _subMenuContainerView.backgroundColor = [[UIColor brownColor] colorWithAlphaComponent:0.2f];
         _subMenuContainerView.userInteractionEnabled = NO;
         [self addSubview:_subMenuContainerView];
         
@@ -80,7 +80,7 @@
         _menuBackLabel.backgroundColor = [[self colorClass] performSelector:@selector(backColor)];
         _menuBackLabel.textColor = [[self colorClass] performSelector:@selector(backTextColor)];
 #pragma clang diagnostic pop
-
+        
         _menuBackLabel.alpha = 0.f;
         
         UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapMenu:)];
@@ -105,13 +105,19 @@
 
 
 - (void)performTapOnSubMenusWithTapPoint:(CGPoint)tapPoint {
+    __block BOOL found = NO;
     [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
         CGPoint tapPointConverted = [self convertPoint:tapPoint toView:subMenu.menuView];
         if (CGRectContainsPoint(subMenu.menuView.menuFrontLabel.bounds, tapPointConverted)) {
             [subMenu didTapMenu:self];
+            found = YES;
             *stop = YES;
         }
     }];
+    
+    if (!found) {
+        [self.flipMenu popToRoot];
+    }
 }
 
 
@@ -138,14 +144,16 @@
         // menu was closed when user tapped -> depending on device orientation, move up or left
         if (isLandscape) {
             // landscape -> move left
-            newCenter = CGPointMake(CGRectGetWidth(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding, self.centerY);
+            newCenter = CGPointMake(CGRectGetWidth(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding, self.centerY/2.f);
             
         } else {
             // portrait -> move up
-            newCenter = CGPointMake(self.centerX, CGRectGetHeight(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding);
+            newCenter = CGPointMake(self.centerX/2.f, CGRectGetHeight(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding);
         }
+        
     }
     
+    //    self.menuWrapperView.backgroundColor = [UIColor magentaColor];
     self.menuWrapperView.center = newCenter;
     
     self.menuFrontLabel.center = [self convertPoint:self.menuWrapperView.center toView:self.menuWrapperView];
@@ -179,7 +187,10 @@
     
     if (self.flipMenu.isClosed) {
         // menu was opened when user tapped -> move to center again
-        newCenter = self.center;
+        newCenter = self.middlePoint;
+        subMenu.menuView.center = newCenter;
+        subMenu.menuView.width = kRGFlipSubMenuWidth;
+        subMenu.menuView.height = kRGFlipSubMenuHeight;
         subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
         
     } else {
@@ -189,45 +200,26 @@
         
         if (isLandscape) {
             CGFloat x = CGRectGetWidth(self.menuFrontLabel.frame);
-            CGRect subMenusContainerRect = CGRectMake(x, self.top, self.width-x, self.height);
+            CGRect subMenusContainerRect = CGRectMake(x, 0, self.width-x, self.height);
             self.subMenuContainerView.frame = CGRectInset(subMenusContainerRect, 30, 30);
         } else {
             
             CGFloat y = CGRectGetHeight(self.menuFrontLabel.frame);
-            CGRect subMenusContainerRect = CGRectMake(self.x, y, self.width, self.height-y);
+            CGRect subMenusContainerRect = CGRectMake(0, y, self.width, self.height-y);
             self.subMenuContainerView.frame = CGRectInset(subMenusContainerRect, 30, 30);
             
         }
         
         if (subMenu.isClosed) {
             newCenter = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];
+            subMenu.menuView.center = newCenter;
+            subMenu.menuView.width = kRGFlipSubMenuWidth;
+            subMenu.menuView.height = kRGFlipSubMenuHeight;
             subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-        }
-    }
-    
-    if (!subMenu.isClosed) {
-        // user opened this submenu -> take over screen
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [UIView animateWithDuration:0.8f animations:^{
-                subMenu.menuView.frame = self.frame;
-            }];
-        });
-        
-//    } else if (subMenu.isClosed && self.flipMenu.superMenu) {
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            [UIView animateWithDuration:0.8f animations:^{
-//                subMenu.menuView.width = kRGFlipSubMenuWidth;
-//                subMenu.menuView.height = kRGFlipSubMenuHeight;
-//                subMenu.menuView.center = newCenter;
-//            }];
-//        });
+        } else {
+            subMenu.menuView.frame = CGRectMake(0, 0, self.flipMenu.menuView.width, self.flipMenu.menuView.height);
 
-    } else {
-        
-        subMenu.menuView.width = kRGFlipSubMenuWidth;
-        subMenu.menuView.height = kRGFlipSubMenuHeight;
-        subMenu.menuView.center = newCenter;
-        
+        }
     }
 }
 

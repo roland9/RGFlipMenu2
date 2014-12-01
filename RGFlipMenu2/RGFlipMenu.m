@@ -24,13 +24,13 @@
 # pragma mark - Public Factories
 
 // create instance with sub menus
-+ (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
++ (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText {
     
     return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText];
 }
 
 // create instance as leaf (no submenus) but action block instead
-+ (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText menuBounds:(CGRect)theMenuBounds {
++ (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText {
     
     return [[RGFlipMenu alloc] initWithSubMenus:nil superMenu:theSuperMenu actionBlock:theActionBlock menuText:theMenuText];
 }
@@ -57,6 +57,12 @@
     }
 }
 
+
+- (void)popToRoot {
+    if (!self.isClosed) {
+        [self didTapMenu:nil];
+    }
+}
 
 #define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
 #define kRGFlipMenuBackScale 0.6f
@@ -137,9 +143,7 @@
         // hide the back button from parent menu
         self.menuView.menuWrapperView.alpha = 0.f;
         
-//        [theSubMenuToShow.menuView setNeedsLayout];
-        // set frame to force layout again - why does setneedslayout not work here?
-        theSubMenuToShow.menuView.frame = CGRectMake(0, 0, 320, 320);
+        [theSubMenuToShow.menuView repositionSubViews];
         
     } completion:nil];
 }
@@ -154,8 +158,7 @@
         
         // show the back button from parent menu
         self.menuView.menuWrapperView.alpha = 1.f;
-
-        theSubMenuToBeClosed.menuView.frame = CGRectMake(0, 0, 320, 320);
+        [theSubMenuToBeClosed.menuView repositionSubViews];
         
     } completion:nil];
 }
