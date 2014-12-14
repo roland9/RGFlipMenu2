@@ -36,17 +36,17 @@
     self = [super init];
     if (self) {
         
-        //        self.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.2f];
+        self.backgroundColor = [[UIColor lightGrayColor] colorWithAlphaComponent:0.2f];
         _flipMenu = theFlipMenu;
         
         _subMenuContainerView = [UIView new];
         _subMenuContainerView.backgroundColor = [[UIColor brownColor] colorWithAlphaComponent:0.2f];
         _subMenuContainerView.userInteractionEnabled = NO;
         [self addSubview:_subMenuContainerView];
-        
+
         [theFlipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
             RGFlipMenuView *subMenuView = subMenu.menuView;
-            [self addSubview:subMenuView];
+            [_subMenuContainerView addSubview:subMenuView];
         }];
         
         _menuWrapperView = [[UIView alloc] init];
@@ -66,7 +66,7 @@
         _menuBackLabel = [[UILabel alloc] init];
         _menuBackLabel.font = [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
         _menuBackLabel.textAlignment = NSTextAlignmentCenter;
-        _menuBackLabel.text = @"Back";
+        _menuBackLabel.text = NSLocalizedString(@"Back in menu", @"Back in card backside menu");
         _menuBackLabel.numberOfLines = 2;
         _menuBackLabel.userInteractionEnabled = NO;
         _menuBackLabel.layer.cornerRadius = 5.f;
@@ -133,7 +133,96 @@
 }
 
 
-- (void)repositionSubViews {
+# pragma mark - Private
+
+- (Class)colorClass {
+    return [self.flipMenu.rgFlipMenuColorClass class] ?: [self.flipMenu.superMenu.rgFlipMenuColorClass class];
+}
+
+
+- (void)repositionSubMenu:(RGFlipMenu *)subMenu subMenuIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex {
+    
+    CGPoint newCenter;
+    
+    if (self.flipMenu.superMenu && self.flipMenu.isClosed) {
+        subMenu.menuView.alpha = 0.f;
+    } else if (self.flipMenu.superMenu && !self.flipMenu.isClosed) {
+        subMenu.menuView.alpha = 1.f;
+    }
+    
+    if (self.flipMenu.isClosed) {
+        // menu was opened when user tapped -> move to center again
+
+        subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipSubMenuWidth, kRGFlipSubMenuHeight);
+        newCenter = [self.subMenuContainerView convertPoint:self.middlePoint fromView:self];
+        subMenu.menuView.center = newCenter;
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
+
+
+    } else {
+        
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+
+        if (subMenu.isClosed) {
+            newCenter = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];
+            subMenu.menuView.center = newCenter;
+            subMenu.menuView.width = kRGFlipSubMenuWidth;
+            subMenu.menuView.height = kRGFlipSubMenuHeight;
+            subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, 100, 100);
+            subMenu.menuView.menuFrontLabel.frame = CGRectMake(0, 0, kRGFlipSubMenuWidth, kRGFlipSubMenuHeight);
+            subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+            
+        } else {
+            subMenu.menuView.frame = CGRectMake(0, 0, self.flipMenu.menuView.width, self.flipMenu.menuView.height);
+
+        }
+    }
+}
+
+
+- (CGPoint)subMenuCenterWithIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex subMenuContainerView:(UIView *)subMenuContainerView {
+    NSUInteger maxIndex;
+    if (theMaxIndex%2 == 1)
+        maxIndex = theMaxIndex+1;
+    else
+        maxIndex = theMaxIndex;
+    
+    if (isLandscape) {
+        
+        CGPoint subMenuCenter = CGPointMake(0 + subMenuContainerView.width/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.width/maxIndex*2.f),
+                                            subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
+        return subMenuCenter;
+        
+    } else {
+        
+        CGPoint subMenuCenter = CGPointMake(subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
+                                            subMenuContainerView.height/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.height/maxIndex*2.f));
+        return subMenuCenter;
+    }
+}
+
+
+- (void)repositionViews {
+    
+    self.menuWrapperView.frame = CGRectInset(self.frame, 20, 20);
+
+    if (!self.flipMenu.superMenu) {
+        
+        // root menu
+        self.menuFrontLabel.width = kRGFlipMenuWidth;
+        self.menuFrontLabel.height = kRGFlipMenuHeight;
+        self.menuBackLabel.width = kRGFlipMenuWidth;
+        self.menuBackLabel.height = kRGFlipMenuHeight;
+        
+    } else {
+        
+        // sub menu
+        self.menuFrontLabel.width = kRGFlipSubMenuWidth;
+        self.menuFrontLabel.height = kRGFlipSubMenuHeight;
+        self.menuBackLabel.width = kRGFlipSubMenuWidth;
+        self.menuBackLabel.height = kRGFlipSubMenuHeight;
+    }
+    
     CGPoint newCenter;
     
     if (self.flipMenu.isClosed) {
@@ -153,122 +242,40 @@
         
     }
     
-    //    self.menuWrapperView.backgroundColor = [UIColor magentaColor];
-    self.menuWrapperView.center = newCenter;
+    self.center = newCenter;
     
-    self.menuFrontLabel.center = [self convertPoint:self.menuWrapperView.center toView:self.menuWrapperView];
-    self.menuBackLabel.center = self.menuFrontLabel.center;
-    [self repositionSubMenus];
-}
-
-
-# pragma mark - Private
-
-- (Class)colorClass {
-    return [self.flipMenu.rgFlipMenuColorClass class] ?: [self.flipMenu.superMenu.rgFlipMenuColorClass class];
-}
-
-- (void)repositionSubMenus {
-    [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
-        [self repositionSubMenu:subMenu subMenuIndex:idx maxIndex:[self.flipMenu.subMenus count]];
-    }];
-}
-
-
-- (void)repositionSubMenu:(RGFlipMenu *)subMenu subMenuIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex {
+//    self.menuWrapperView.backgroundColor = [UIColor magentaColor];
+    self.menuWrapperView.center = self.middlePoint;
     
-    CGPoint newCenter;
-    
-    if (self.flipMenu.superMenu && self.flipMenu.isClosed) {
-        subMenu.menuView.alpha = 0.f;
-    } else if (self.flipMenu.superMenu && !self.flipMenu.isClosed) {
-        subMenu.menuView.alpha = 1.f;
-    }
-    
+    self.menuFrontLabel.center = [self.menuWrapperView convertPoint:self.middlePoint fromView:self];
+    self.menuBackLabel.frame = self.menuFrontLabel.frame;
+
+
+    // reposition subMenuContainerView
     if (self.flipMenu.isClosed) {
-        // menu was opened when user tapped -> move to center again
-        newCenter = self.middlePoint;
-        subMenu.menuView.center = newCenter;
-        subMenu.menuView.width = kRGFlipSubMenuWidth;
-        subMenu.menuView.height = kRGFlipSubMenuHeight;
-        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
+        self.subMenuContainerView.frame = CGRectMake(0, 0, kRGFlipMenuWidth+40, kRGFlipMenuHeight+40);;
+        self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self.subMenuContainerView];
         
     } else {
-        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-        
         // menu was closed when user tapped -> depending on device orientation, move up or left
-        
         if (isLandscape) {
             CGFloat x = CGRectGetWidth(self.menuFrontLabel.frame);
-            CGRect subMenusContainerRect = CGRectMake(x, 0, self.width-x, self.height);
-            self.subMenuContainerView.frame = CGRectInset(subMenusContainerRect, 30, 30);
+            self.subMenuContainerView.frame = CGRectMake(x, 0, self.width-x-20, self.height-20);
+            self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            self.subMenuContainerView.centerX += x/2.f;
         } else {
             
             CGFloat y = CGRectGetHeight(self.menuFrontLabel.frame);
-            CGRect subMenusContainerRect = CGRectMake(0, y, self.width, self.height-y);
-            self.subMenuContainerView.frame = CGRectInset(subMenusContainerRect, 30, 30);
-            
-        }
-        
-        if (subMenu.isClosed) {
-            newCenter = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];
-            subMenu.menuView.center = newCenter;
-            subMenu.menuView.width = kRGFlipSubMenuWidth;
-            subMenu.menuView.height = kRGFlipSubMenuHeight;
-            subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-        } else {
-            subMenu.menuView.frame = CGRectMake(0, 0, self.flipMenu.menuView.width, self.flipMenu.menuView.height);
-
+            self.subMenuContainerView.frame = CGRectMake(10, y, self.width-20, self.height-y-20);
+            self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            self.subMenuContainerView.centerY += y/2.f;
         }
     }
-}
 
-
-- (CGPoint)subMenuCenterWithIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex subMenuContainerView:(UIView *)subMenuContainerView {
-    NSUInteger maxIndex;
-    if (theMaxIndex%2 == 1)
-        maxIndex = theMaxIndex+1;
-    else
-        maxIndex = theMaxIndex;
-    
-    if (isLandscape) {
-        
-        CGPoint subMenuCenter = CGPointMake(subMenuContainerView.x + subMenuContainerView.width/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.width/maxIndex*2.f),
-                                            subMenuContainerView.y + subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
-        return subMenuCenter;
-        
-    } else {
-        
-        CGPoint subMenuCenter = CGPointMake(subMenuContainerView.x + subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
-                                            subMenuContainerView.y + subMenuContainerView.height/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.height/maxIndex*2.f));
-        return subMenuCenter;
-    }
-}
-
-- (void)layoutSubviews {
-    [super layoutSubviews];
-    
-    if (!self.flipMenu.superMenu) {
-        
-        // root menu
-        self.menuWrapperView.frame = CGRectInset(self.frame, 20, 20);
-        self.menuFrontLabel.width = kRGFlipMenuWidth;
-        self.menuFrontLabel.height = kRGFlipMenuHeight;
-        self.menuBackLabel.width = kRGFlipMenuWidth;
-        self.menuBackLabel.height = kRGFlipMenuHeight;
-        
-    } else {
-        
-        // sub menu
-        self.menuWrapperView.frame = CGRectInset(self.frame, 20, 20);
-        self.menuFrontLabel.width = kRGFlipSubMenuWidth;
-        self.menuFrontLabel.height = kRGFlipSubMenuHeight;
-        self.menuBackLabel.width = kRGFlipSubMenuWidth;
-        self.menuBackLabel.height = kRGFlipSubMenuHeight;
-    }
-    
-    [self repositionSubViews];
-    [self repositionSubMenus];
+    // reposition subMenus
+    [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        [self repositionSubMenu:subMenu subMenuIndex:idx maxIndex:[self.flipMenu.subMenus count]];
+    }];
 }
 
 @end

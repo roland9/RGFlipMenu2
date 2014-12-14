@@ -22,7 +22,11 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    self.flipMenu = [RGFlipMenu createWithSubMenus:nil superMenu:nil menuText:@"Main Menu"];
+    self.flipMenu = [RGFlipMenu createWithActionBlock:^(id me) {
+        //
+    }
+                                            superMenu:nil
+                                             menuText:@"Main Menu"];
     self.flipMenu.rgFlipMenuColorClass = NSClassFromString(@"RGFlipMenuColors");
     
     NSArray *subSubMenus2 = @[
@@ -132,15 +136,15 @@
     RGFlipMenuView *flipMenuView = self.flipMenu.menuView;
     //    flipMenuView.backgroundColor = [[UIColor yellowColor] colorWithAlphaComponent:0.2f];
     
-    [self.view addSubview:flipMenuView];
+    [self.view insertSubview:self.flipMenu.menuView atIndex:0];
 }
 
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
     
-    self.flipMenu.menuView.frame = CGRectInset(self.view.frame, 200, 200);
-    self.flipMenu.menuView.center = self.view.center;
+    self.flipMenu.menuView.frame = self.view.frame;
+    [self.flipMenu.menuView repositionViews];
 }
 
 @end

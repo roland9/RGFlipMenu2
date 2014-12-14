@@ -14,7 +14,7 @@
 @property (nonatomic, strong) UIView *menuWrapperView;
 
 - (instancetype)initWithFlipMenu:(RGFlipMenu *)theFlipMenu;
-- (void)repositionSubViews;
+- (void)repositionViews;
 - (void)hideMenuLabel;
 - (void)showMenuLabel;
 

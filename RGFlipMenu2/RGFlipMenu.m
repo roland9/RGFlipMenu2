@@ -72,40 +72,46 @@
 
 - (void)didTapMenu:(id)sender {
     
+    // execute actionBlock
     if (self.actionBlock) {
         self.actionBlock(self);
     }
     
-    if (!self.subMenus) {
-        [UIView animateWithDuration:0.2f animations:^{
-            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
-        } completion:^(BOOL finished) {
-            [UIView animateWithDuration:0.2f animations:^{
-                self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-            } completion:^(BOOL finished) {
-            }];
-        }];
-        return;
-    }
+#warning WIP
+//    // if no submenus to show: shrink and unshrink
+//    if (!self.subMenus) {
+//        [UIView animateWithDuration:0.2f animations:^{
+//            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+//        } completion:^(BOOL finished) {
+//            [UIView animateWithDuration:0.2f animations:^{
+//                self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+//            } completion:^(BOOL finished) {
+//            }];
+//        }];
+//        return;
+//    }
     
+    // toggle status
     self.closed = !self.isClosed;
     
-    if (self.superMenu) {
-        if (!self.isClosed) {
-            [self.superMenu hideAndResizeToShowSubMenu:self];
-        } else {
-            [self.superMenu showAndResizeWithSubMenuToBeClosed:self];
-        }
-    }
+#warning WIP
+//    // if there is super menu, handle repositioning
+//    if (self.superMenu) {
+//        if (!self.isClosed) {
+//            [self.superMenu hideAndResizeToShowSubMenu:self];
+//        } else {
+//            [self.superMenu showAndResizeWithSubMenuToBeClosed:self];
+//        }
+//    }
     
-    // move up and hide or show submenus
-    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
-        [self closeAllSubMenus];
-        
-        [self.menuView repositionSubViews];
-        
-    } completion:^(BOOL finished) {
-    }];
+//    // move up and hide or show submenus
+//    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+//        [self closeAllSubMenus];
+//        
+//        [self.menuView repositionSubViews];
+//        
+//    } completion:^(BOOL finished) {
+//    }];
     
     // hide label -> once the 'backside' of the view is shown, it will be hidden
     if (self.closed) {
@@ -113,6 +119,10 @@
     } else {
         [self.menuView hideMenuLabel];
     }
+
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [self.menuView repositionViews];
+    } completion:nil];
     
     // flip menu
     [UIView transitionWithView:self.menuView.menuWrapperView
@@ -143,7 +153,7 @@
         // hide the back button from parent menu
         self.menuView.menuWrapperView.alpha = 0.f;
         
-        [theSubMenuToShow.menuView repositionSubViews];
+        [theSubMenuToShow.menuView repositionViews];
         
     } completion:nil];
 }
@@ -158,7 +168,7 @@
         
         // show the back button from parent menu
         self.menuView.menuWrapperView.alpha = 1.f;
-        [theSubMenuToBeClosed.menuView repositionSubViews];
+        [theSubMenuToBeClosed.menuView repositionViews];
         
     } completion:nil];
 }
