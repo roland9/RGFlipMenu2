@@ -72,88 +72,114 @@
 
 - (void)didTapMenu:(id)sender {
     
-    // execute actionBlock
-    if (self.actionBlock) {
-        self.actionBlock(self);
-    }
-    
-#warning WIP
-//    // if no submenus to show: shrink and unshrink
-//    if (!self.subMenus) {
-//        [UIView animateWithDuration:0.2f animations:^{
-//            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
-//        } completion:^(BOOL finished) {
-//            [UIView animateWithDuration:0.2f animations:^{
-//                self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-//            } completion:^(BOOL finished) {
-//            }];
-//        }];
-//        return;
-//    }
-    
-    // toggle status
-    self.closed = !self.isClosed;
-    
-#warning WIP
-//    // if there is super menu, handle repositioning
-//    if (self.superMenu) {
-//        if (!self.isClosed) {
-//            [self.superMenu hideAndResizeToShowSubMenu:self];
-//        } else {
-//            [self.superMenu showAndResizeWithSubMenuToBeClosed:self];
-//        }
-//    }
-    
-//    // move up and hide or show submenus
-//    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
-//        [self closeAllSubMenus];
-//        
-//        [self.menuView repositionSubViews];
-//        
-//    } completion:^(BOOL finished) {
-//    }];
-    
-    // hide label -> once the 'backside' of the view is shown, it will be hidden
-    if (self.closed) {
-        [self.menuView showMenuLabel];
-    } else {
-        [self.menuView hideMenuLabel];
-    }
+    [self flipMenuView:self];
 
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
         [self.menuView repositionViews];
     } completion:nil];
-    
-    // flip menu
-    [UIView transitionWithView:self.menuView.menuWrapperView
-                      duration:kRGAnimationDuration/3.f
-                       options: (isLandscape ?
-                                 (self.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
-                                 (self.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
-                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
-                    animations:^{
-                        
-                        if (self.closed)
-                            self.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-                        else
-                            self.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale, kRGFlipMenuBackScale);
-                        
-                    } completion:nil];
+
+    if (self.actionBlock) {
+        self.actionBlock(self);
+    }
 }
 
 
-- (void)hideAndResizeToShowSubMenu:(RGFlipMenu *)theSubMenuToShow {
+- (void)didTapSubMenu:(RGFlipMenu *)theSubMenu {
+    
+    // if no submenus to show: shrink and unshrink
+    if (!theSubMenu.subMenus) {
+        [UIView animateWithDuration:0.1f animations:^{
+            theSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+        } completion:^(BOOL finished) {
+            [UIView animateWithDuration:0.1f animations:^{
+                theSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+            } completion:^(BOOL finished) {
+                if (theSubMenu.actionBlock) {
+                    theSubMenu.actionBlock(self);
+                }
+            }];
+        }];
+        
+    } else {
+        
+        // handle repositioning of main menu
+        if (!self.isClosed) {
+            
+            [self hideSubMenusToShowSubMenu:theSubMenu];
+            
+        } else {
+            
+            [self showAndResizeWithSubMenuToBeClosed:theSubMenu];
+        }
+        
+//        // move up and hide or show submenus
+//        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+//            [self closeAllSubMenus];
+//            
+//            [self.menuView repositionSubViews];
+//            
+//        } completion:^(BOOL finished) {
+//        }];
+        
+    }
+}
+
+
+- (void)flipMenuView:(RGFlipMenu *)theMenu {
+    
+    // toggle status
+    theMenu.closed = !theMenu.isClosed;
+    
+    // hide label -> once the 'backside' of the view is shown, it will be hidden
+    if (theMenu.closed) {
+        [theMenu.menuView showMenuLabel];
+    } else {
+        [theMenu.menuView hideMenuLabel];
+    }
+    
+    // flip menu
+    [UIView transitionWithView:theMenu.menuView.menuWrapperView
+                      duration:kRGAnimationDuration/3.f
+                       options: (isLandscape ?
+                                 (theMenu.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
+                                 (theMenu.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
+                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                    animations:^{
+                        
+                        if (theMenu.closed)
+                            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+                        else
+                            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale, kRGFlipMenuBackScale);
+                        
+                    } completion:nil];
+
+}
+
+
+- (void)hideSubMenusToShowSubMenu:(RGFlipMenu *)theSubMenuToShow {
     
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
 
-        [self.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
-            subMenu.hideToShowSibling = (subMenu!=theSubMenuToShow);
-        }];
-        
-        // hide the back button from parent menu
+        // hide the back button from main menu
         self.menuView.menuWrapperView.alpha = 0.f;
         
-        [theSubMenuToShow.menuView repositionViews];
+        // hide & shrink other submenus
+        for (RGFlipMenu *subMenu in self.subMenus) {
+            if (subMenu != theSubMenuToShow) {
+                subMenu.menuView.alpha = 0.f;
+                subMenu.menuView.layer.transform = CATransform3DMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale, kRGFlipMenuBackScale);
+                subMenu.hideToShowSibling = YES;
+            }
+        }
+        
+        // show selected subMenu
+        [self.menuView showSubMenu:theSubMenuToShow];
+        
+//        [self flipMenuView:theSubMenuToShow];
+        
+//        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+//            [theSubMenuToShow.menuView repositionViews];
+//        } completion:nil];
         
     } completion:nil];
 }

@@ -11,10 +11,11 @@
 
 typedef void (^RGFlipMenuActionBlock)(id me);
 
-@class RGFlipMenuView;
+@class RGFlipMenuView, RGFlipMenu;
 
 @protocol RGFlipMenuTapProtocol <NSObject>
 - (void)didTapMenu:(id)sender;
+- (void)didTapSubMenu:(RGFlipMenu *)theSubMenu;
 @end
 
 

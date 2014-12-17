@@ -82,11 +82,22 @@
 #pragma clang diagnostic pop
         
         _menuBackLabel.alpha = 0.f;
-        
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapMenu:)];
-        [_menuWrapperView addGestureRecognizer:tap];
     }
     return self;
+}
+
+
+- (void)didMoveToSuperview {
+    if (self.superview) {
+        
+        // add the tap gesture recognizer only for the root menu
+        // we have to add it to the superview because it will be moved aside when a menu is tapped, thus blocking taps on outside menus
+        if (!_flipMenu.superMenu) {
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(didTapMenu:)];
+            [self.superview addGestureRecognizer:tap];
+        }
+
+    }
 }
 
 
@@ -94,22 +105,25 @@
     NSAssert([sender isKindOfClass:[UITapGestureRecognizer class]], @"inconsistent");
     
     UITapGestureRecognizer *tap = sender;
-    CGPoint tapPoint = [tap locationInView:self.menuFrontLabel];
-    if (CGRectContainsPoint(self.menuFrontLabel.bounds, tapPoint)) {
+    CGPoint tapPoint = [tap locationInView:self.menuWrapperView];
+    if (CGRectContainsPoint(self.menuFrontLabel.frame, tapPoint)) {
         [self.flipMenu didTapMenu:self];
         return;
     }
     
-    [self performTapOnSubMenusWithTapPoint:[tap locationInView:self]];
+    [self performTapOnSubMenusWithTapPoint:tapPoint];
 }
 
 
 - (void)performTapOnSubMenusWithTapPoint:(CGPoint)tapPoint {
     __block BOOL found = NO;
     [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
-        CGPoint tapPointConverted = [self convertPoint:tapPoint toView:subMenu.menuView];
-        if (CGRectContainsPoint(subMenu.menuView.menuFrontLabel.bounds, tapPointConverted)) {
-            [subMenu didTapMenu:self];
+        
+        CGPoint tapPointConverted = [self.menuWrapperView convertPoint:tapPoint toView:subMenu.menuView.menuWrapperView];
+        
+        if (CGRectContainsPoint(subMenu.menuView.menuFrontLabel.frame, tapPointConverted)) {
+            
+            [self.flipMenu didTapSubMenu:subMenu];
             found = YES;
             *stop = YES;
         }
@@ -202,6 +216,14 @@
 }
 
 
+- (void)showSubMenu:(RGFlipMenu *)theSubMenu {
+    theSubMenu.menuView.frame = CGRectMake(0, 0, CGRectGetWidth(self.subMenuContainerView.frame), CGRectGetHeight(self.subMenuContainerView.frame));
+    
+    theSubMenu.closed = NO;
+    [theSubMenu.menuView repositionViews];
+}
+
+
 - (void)repositionViews {
     
     self.menuWrapperView.frame = CGRectInset(self.frame, 20, 20);
@@ -230,7 +252,7 @@
         newCenter = self.middlePoint;
         
     } else {
-        // menu was closed when user tapped -> depending on device orientation, move up or left
+        // menu is opening now -> depending on device orientation, move menuView up or left
         if (isLandscape) {
             // landscape -> move left
             newCenter = CGPointMake(CGRectGetWidth(self.menuFrontLabel.frame)/2.f+kRGFlipMenuPadding, self.centerY/2.f);
@@ -257,17 +279,28 @@
         self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self.subMenuContainerView];
         
     } else {
-        // menu was closed when user tapped -> depending on device orientation, move up or left
+        // menu is opening now -> depending on device orientation, the subMenuContainerView fills out rest of space
         if (isLandscape) {
             CGFloat x = CGRectGetWidth(self.menuFrontLabel.frame);
             self.subMenuContainerView.frame = CGRectMake(x, 0, self.width-x-20, self.height-20);
-            self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            if (!self.flipMenu.superMenu) {
+                self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            } else {
+                // inception - move to superview superview??
+#warning WIP
+                self.subMenuContainerView.center = [self.flipMenu.superMenu.menuView.superview convertPoint:self.flipMenu.superMenu.menuView.superview.center toView:self];
+            }
             self.subMenuContainerView.centerX += x/2.f;
         } else {
             
             CGFloat y = CGRectGetHeight(self.menuFrontLabel.frame);
             self.subMenuContainerView.frame = CGRectMake(10, y, self.width-20, self.height-y-20);
-            self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            if (!self.flipMenu.superMenu) {
+                self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self];
+            } else {
+                // inception - move to superview superview??
+                self.subMenuContainerView.center = [self.flipMenu.superMenu.menuView.superview convertPoint:self.flipMenu.superMenu.menuView.superview.center toView:self];
+            }
             self.subMenuContainerView.centerY += y/2.f;
         }
     }
