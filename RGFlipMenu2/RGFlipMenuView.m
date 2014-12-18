@@ -8,6 +8,7 @@
 
 #import "RGFlipMenuView.h"
 #import "FrameAccessor.h"
+#import "RGFlipMenu.h"
 //#import "RGFlipMenuColors.h"
 
 
@@ -107,7 +108,7 @@
     UITapGestureRecognizer *tap = sender;
     CGPoint tapPoint = [tap locationInView:self.menuWrapperView];
     if (CGRectContainsPoint(self.menuFrontLabel.frame, tapPoint)) {
-        [self.flipMenu didTapMenu:self];
+        [self.flipMenu handleTapMenu:self];
         return;
     }
     
@@ -123,7 +124,7 @@
         
         if (CGRectContainsPoint(subMenu.menuView.menuFrontLabel.frame, tapPointConverted)) {
             
-            [self.flipMenu didTapSubMenu:subMenu];
+            [self.flipMenu handleTapSubMenu:subMenu];
             found = YES;
             *stop = YES;
         }
@@ -154,46 +155,6 @@
 }
 
 
-- (void)repositionSubMenu:(RGFlipMenu *)subMenu subMenuIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex {
-    
-    CGPoint newCenter;
-    
-    if (self.flipMenu.superMenu && self.flipMenu.isClosed) {
-        subMenu.menuView.alpha = 0.f;
-    } else if (self.flipMenu.superMenu && !self.flipMenu.isClosed) {
-        subMenu.menuView.alpha = 1.f;
-    }
-    
-    if (self.flipMenu.isClosed) {
-        // menu was opened when user tapped -> move to center again
-
-        subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipSubMenuWidth, kRGFlipSubMenuHeight);
-        newCenter = [self.subMenuContainerView convertPoint:self.middlePoint fromView:self];
-        subMenu.menuView.center = newCenter;
-        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
-
-
-    } else {
-        
-        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-
-        if (subMenu.isClosed) {
-            newCenter = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];
-            subMenu.menuView.center = newCenter;
-            subMenu.menuView.width = kRGFlipSubMenuWidth;
-            subMenu.menuView.height = kRGFlipSubMenuHeight;
-            subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, 100, 100);
-            subMenu.menuView.menuFrontLabel.frame = CGRectMake(0, 0, kRGFlipSubMenuWidth, kRGFlipSubMenuHeight);
-            subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-            
-        } else {
-            subMenu.menuView.frame = CGRectMake(0, 0, self.flipMenu.menuView.width, self.flipMenu.menuView.height);
-
-        }
-    }
-}
-
-
 - (CGPoint)subMenuCenterWithIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex subMenuContainerView:(UIView *)subMenuContainerView {
     NSUInteger maxIndex;
     if (theMaxIndex%2 == 1)
@@ -216,11 +177,75 @@
 }
 
 
-- (void)showSubMenu:(RGFlipMenu *)theSubMenu {
-    theSubMenu.menuView.frame = CGRectMake(0, 0, CGRectGetWidth(self.subMenuContainerView.frame), CGRectGetHeight(self.subMenuContainerView.frame));
+- (void)flipMenu:(RGFlipMenu *)theFlipMenu {
     
-    theSubMenu.closed = NO;
-    [theSubMenu.menuView repositionViews];
+    // hide label -> once the 'backside' of the view is shown, it will be hidden
+    if (theFlipMenu.closed) {
+        [theFlipMenu.menuView showMenuLabel];
+    } else {
+        [theFlipMenu.menuView hideMenuLabel];
+    }
+    
+    [UIView transitionWithView:theFlipMenu.menuView.menuWrapperView
+                      duration:kRGAnimationDuration/3.f
+                       options: (isLandscape ?
+                                 (theFlipMenu.isClosed ? UIViewAnimationOptionTransitionFlipFromLeft : UIViewAnimationOptionTransitionFlipFromRight) :
+                                 (theFlipMenu.isClosed ? UIViewAnimationOptionTransitionFlipFromBottom : UIViewAnimationOptionTransitionFlipFromTop)
+                                 ) | UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState
+                    animations:^{
+                        
+                        if (theFlipMenu.closed)
+                            theFlipMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+                        else
+                            theFlipMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(kRGFlipMenuBackScale, kRGFlipMenuBackScale, kRGFlipMenuBackScale);
+                        
+                    } completion:nil];
+}
+
+
+# pragma mark - repositioning views; overwriting layoutSubviews() doesn't work because cannot control the animations properly
+
+- (void)repositionSubMenu:(RGFlipMenu *)subMenu subMenuIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex {
+    
+    if (self.flipMenu.isClosed) {
+        
+        // main menu is closed -> move subMenu to center again and shrink it / fade it
+        subMenu.closed = YES;
+        
+        subMenu.menuView.alpha = 0.f;
+        subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
+        subMenu.menuView.center = [self.subMenuContainerView convertPoint:self.middlePoint fromView:self];
+        
+        subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
+        
+        subMenu.menuView.menuFrontLabel.frame = CGRectMake(0, 0, kRGFlipSubMenuWidth, kRGFlipSubMenuHeight);
+        subMenu.menuView.menuFrontLabel.center = [subMenu.menuView convertPoint:subMenu.menuView.menuWrapperView.center toView:subMenu.menuView.menuWrapperView];
+        subMenu.menuView.menuBackLabel.frame = subMenu.menuView.menuFrontLabel.frame;
+        
+    } else {
+        
+        // main menu is opened -> fan out subMenu and scale back to full size; if one of the subMenus is opened: hide others
+        
+        subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+        
+        if (subMenu.isHiddenToShowSibling) {
+            subMenu.menuView.alpha = 0.f;
+        } else {
+            subMenu.menuView.alpha = 1.f;
+        }
+        
+        if (subMenu.isClosed) {
+            subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
+            subMenu.menuView.center = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:self.subMenuContainerView];;
+            
+        } else {
+            
+            subMenu.menuView.frame = CGRectMake(0, 0, self.flipMenu.menuView.width, self.flipMenu.menuView.height);
+
+        }
+    }
+    
 }
 
 
@@ -272,13 +297,15 @@
     self.menuFrontLabel.center = [self.menuWrapperView convertPoint:self.middlePoint fromView:self];
     self.menuBackLabel.frame = self.menuFrontLabel.frame;
 
-
     // reposition subMenuContainerView
     if (self.flipMenu.isClosed) {
         self.subMenuContainerView.frame = CGRectMake(0, 0, kRGFlipMenuWidth+40, kRGFlipMenuHeight+40);;
         self.subMenuContainerView.center = [self.superview convertPoint:self.superview.center toView:self.subMenuContainerView];
         
     } else {
+
+#warning todoRG if one of the submenus is open, HIDE the main menu here!  and don't move (again)
+        
         // menu is opening now -> depending on device orientation, the subMenuContainerView fills out rest of space
         if (isLandscape) {
             CGFloat x = CGRectGetWidth(self.menuFrontLabel.frame);
@@ -308,7 +335,10 @@
     // reposition subMenus
     [self.flipMenu.subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
         [self repositionSubMenu:subMenu subMenuIndex:idx maxIndex:[self.flipMenu.subMenus count]];
+        // reposition subSubMenus
+#warning WIP
     }];
+    
 }
 
 @end

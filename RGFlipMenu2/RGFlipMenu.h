@@ -9,13 +9,18 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
 
+#define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
+#define kRGFlipMenuBackScale 0.6f
+#define kRGAnimationDuration 0.7f
+
+
 typedef void (^RGFlipMenuActionBlock)(id me);
 
 @class RGFlipMenuView, RGFlipMenu;
 
 @protocol RGFlipMenuTapProtocol <NSObject>
-- (void)didTapMenu:(id)sender;
-- (void)didTapSubMenu:(RGFlipMenu *)theSubMenu;
+- (void)handleTapMenu:(id)sender;
+- (void)handleTapSubMenu:(RGFlipMenu *)theSubMenu;
 @end
 
 
