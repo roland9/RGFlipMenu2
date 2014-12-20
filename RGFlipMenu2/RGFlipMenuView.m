@@ -278,16 +278,17 @@
 
 - (void)repositionSubMenu:(RGFlipMenu *)subMenu subMenuIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex {
     
+    subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
+    subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
+    
     if (subMenu.superMenu.isClosed) {
         
         // main menu is closed -> move subMenu to center again and shrink it / fade it
         subMenu.closed = YES;
         
         subMenu.menuView.alpha = 0.f;
-        subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
         subMenu.menuView.center = [self.subMenuContainerView convertPoint:self.middlePoint fromView:self];
         
-        subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
         subMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.2, 0.2, 0.2);
         subMenu.menuView.subMenuContainerView.frame = subMenu.menuView.menuWrapperView.frame;
         
@@ -296,29 +297,24 @@
         subMenu.menuView.menuBackLabel.frame = subMenu.menuView.menuFrontLabel.frame;
 
     } else {
-        
+
+
         // main menu is opened -> fan out subMenu and scale back to full size; if one of the subMenus is opened: hide others
         
         // if subMenu closed -> center in grid
         if (subMenu.isClosed) {
-            subMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
             subMenu.menuView.center = [self subMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:subMenu.superMenu.menuView.subMenuContainerView];;
-            subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, subMenu.menuView.width, subMenu.menuView.height);
             subMenu.menuView.subMenuContainerView.frame = subMenu.menuView.menuWrapperView.frame;
             subMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
             
         } else {
-            subMenu.menuView.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.2];
 
             if (isLandscape) {
-                subMenu.menuView.frame = CGRectMake(-kRGFlipMenuWidth, subMenu.menuView.superview.middleY/2.f, kRGFlipMenuWidth, kRGFlipMenuHeight);
-                subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, subMenu.menuView.width, subMenu.menuView.height);
-                subMenu.menuView.subMenuContainerView.frame = CGRectMake(kRGFlipMenuWidth, -kRGFlipMenuHeight/2.f, subMenu.superMenu.menuView.subMenuContainerView.width, subMenu.superMenu.menuView.subMenuContainerView.height);
+                subMenu.menuView.center = CGPointMake(-kRGFlipSubMenuPadding, subMenu.menuView.superview.height/2.f);
+                subMenu.menuView.subMenuContainerView.frame = CGRectMake(subMenu.menuView.width, subMenu.menuView.height/2.f - subMenu.superMenu.menuView.subMenuContainerView.height/2.f, subMenu.superMenu.menuView.subMenuContainerView.width, subMenu.superMenu.menuView.subMenuContainerView.height);
             } else {
-#warning that's wrong - see iPad
-                subMenu.menuView.frame = CGRectMake(subMenu.menuView.superview.middleX/2.f, -kRGFlipMenuHeight, kRGFlipMenuWidth, kRGFlipMenuHeight);
-                subMenu.menuView.menuWrapperView.frame = CGRectMake(0, 0, subMenu.menuView.width, subMenu.menuView.height);
-                subMenu.menuView.subMenuContainerView.frame = CGRectMake(-kRGFlipMenuWidth/2.f, kRGFlipMenuHeight, subMenu.superMenu.menuView.subMenuContainerView.width, subMenu.superMenu.menuView.subMenuContainerView.height);
+                subMenu.menuView.center = CGPointMake(subMenu.menuView.superview.width/2.f, -kRGFlipSubMenuPadding);
+                subMenu.menuView.subMenuContainerView.frame = CGRectMake(subMenu.menuView.width/2.f - subMenu.superMenu.menuView.subMenuContainerView.width/2.f, subMenu.menuView.height, subMenu.superMenu.menuView.subMenuContainerView.width, subMenu.superMenu.menuView.subMenuContainerView.height);
             }
             
         }

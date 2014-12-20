@@ -21,6 +21,7 @@
 #define kRGFlipSubMenuHeight    120
 
 #define kRGFlipMenuPadding      (isIPad ? 200.f : 30.f)
+#define kRGFlipSubMenuPadding   (isIPad ? 100.f : 60.f)
 
 typedef void (^RGFlipMenuActionBlock)(id me);
 
