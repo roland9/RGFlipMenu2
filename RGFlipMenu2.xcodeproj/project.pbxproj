@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		233FE7831A45EDC6008F8EBC /* RGFlipSubMenuColors.m in Sources */ = {isa = PBXBuildFile; fileRef = 233FE7821A45EDC6008F8EBC /* RGFlipSubMenuColors.m */; };
 		234894C41A2691730009A0F5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894C31A2691730009A0F5 /* main.m */; };
 		234894C71A2691730009A0F5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894C61A2691730009A0F5 /* AppDelegate.m */; };
 		234894CA1A2691730009A0F5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 234894C91A2691730009A0F5 /* ViewController.m */; };
@@ -33,6 +34,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		233FE7811A45EDC6008F8EBC /* RGFlipSubMenuColors.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RGFlipSubMenuColors.h; sourceTree = "<group>"; };
+		233FE7821A45EDC6008F8EBC /* RGFlipSubMenuColors.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RGFlipSubMenuColors.m; sourceTree = "<group>"; };
 		234894BE1A2691730009A0F5 /* RGFlipMenu2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RGFlipMenu2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		234894C21A2691730009A0F5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		234894C31A2691730009A0F5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -117,6 +120,8 @@
 				234894EC1A2695120009A0F5 /* RGFlipMenuView.m */,
 				2357C1261A2D192E00F809F3 /* RGFlipMenuColors.h */,
 				2357C1271A2D192E00F809F3 /* RGFlipMenuColors.m */,
+				233FE7811A45EDC6008F8EBC /* RGFlipSubMenuColors.h */,
+				233FE7821A45EDC6008F8EBC /* RGFlipSubMenuColors.m */,
 				234894CB1A2691730009A0F5 /* Main.storyboard */,
 				234894CE1A2691730009A0F5 /* Images.xcassets */,
 				234894D01A2691730009A0F5 /* LaunchScreen.xib */,
@@ -300,6 +305,7 @@
 				234894C71A2691730009A0F5 /* AppDelegate.m in Sources */,
 				234894C41A2691730009A0F5 /* main.m in Sources */,
 				2357C1281A2D192E00F809F3 /* RGFlipMenuColors.m in Sources */,
+				233FE7831A45EDC6008F8EBC /* RGFlipSubMenuColors.m in Sources */,
 				234894ED1A2695120009A0F5 /* RGFlipMenuView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

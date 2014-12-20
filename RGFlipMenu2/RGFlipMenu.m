@@ -22,17 +22,25 @@
 # pragma mark - Public Factories
 
 // create instance with sub menus
-+ (instancetype)createWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText {
++ (instancetype)createWithSubMenus:(NSArray *)theSubMenus menuText:(NSString *)theMenuText {
     
-    return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus superMenu:theSuperMenu actionBlock:nil menuText:theMenuText];
+    return [[RGFlipMenu alloc] initWithSubMenus:theSubMenus actionBlock:nil menuText:theMenuText];
 }
 
 // create instance as leaf (no submenus) but action block instead
-+ (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock superMenu:(RGFlipMenu *)theSuperMenu menuText:(NSString *)theMenuText {
++ (instancetype)createWithActionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText {
     
-    return [[RGFlipMenu alloc] initWithSubMenus:nil superMenu:theSuperMenu actionBlock:theActionBlock menuText:theMenuText];
+    return [[RGFlipMenu alloc] initWithSubMenus:nil actionBlock:theActionBlock menuText:theMenuText];
 }
 
+
+#pragma - Public
+
+- (BOOL)isSubMenuOpen {
+    return [self.subMenus indexOfObjectPassingTest:^BOOL(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        return !subMenu.isClosed;
+    }] != NSNotFound;
+}
 
 # pragma mark - Accessors
 
@@ -43,6 +51,21 @@
     return _menuView;
 }
 
+- (void)setClosed:(BOOL)closed {
+    _closed = closed;
+    if (closed) {
+        [self.menuView showMenuLabel];
+    } else
+        [self.menuView hideMenuLabel];
+}
+
+// when we set the subMenus, ensure we set the superMenu to self
+- (void)setSubMenus:(NSArray *)subMenus {
+    _subMenus = subMenus;
+    [_subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        subMenu.superMenu = self;
+    }];
+}
 
 - (void)popToRoot {
     if (!self.isClosed) {
@@ -57,10 +80,13 @@
     
     // toggle status
     self.closed = !self.isClosed;
+    NSLog(@"main menu closed=%@", self.closed ? @"YES" : @"NO");
+    
+    [self updateSubMenus:self.subMenus closed:self.closed];
     
     [self.menuView flipMenu:self];
 
-    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
         [self.menuView repositionViews];
     } completion:nil];
 
@@ -88,6 +114,8 @@
         // toggle status
         theSubMenu.closed = !theSubMenu.isClosed;
         
+        [self updateSubMenus:theSubMenu.subMenus closed:theSubMenu.isClosed];
+
         if (!theSubMenu.isClosed) {
             [self hideOtherSubMenusToShow:theSubMenu];
         } else {
@@ -101,7 +129,7 @@
             theSubMenu.actionBlock(self);
         }
 
-        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:0.6f initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionAllowUserInteraction | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
             [self.menuView repositionViews];
         } completion:nil];
         
@@ -110,6 +138,20 @@
 
 
 # pragma mark - Private
+
+- (void)updateSubMenus:(NSArray *)theSubMenus closed:(BOOL)isClosed {
+    [theSubMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        // if menu is closed, close all the subMenus as well
+        if (isClosed) {
+            subMenu.closed = YES;
+            subMenu.hideToShowSibling = NO;
+            [subMenu showAllSubMenus];
+            
+            [self updateSubMenus:subMenu.subMenus closed:isClosed];
+        }
+    }];
+}
+
 
 - (void)showAllSubMenus {
     
@@ -138,9 +180,6 @@
         [UIView animateWithDuration:0.1f animations:^{
             theSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
         } completion:^(BOOL finished) {
-            if (theSubMenu.actionBlock) {
-                theSubMenu.actionBlock(self);
-            }
         }];
     }];
 }
@@ -148,12 +187,14 @@
 
 # pragma mark - Initializer - Private
 
-- (instancetype)initWithSubMenus:(NSArray *)theSubMenus superMenu:(RGFlipMenu *)theSuperMenu actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText {
+- (instancetype)initWithSubMenus:(NSArray *)theSubMenus actionBlock:(RGFlipMenuActionBlock)theActionBlock menuText:(NSString *)theMenuText {
     
     self = [super init];
     if (self) {
         _subMenus = theSubMenus;
-        _superMenu = theSuperMenu;
+        [_subMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+            subMenu.superMenu = self;
+        }];
         _actionBlock = theActionBlock;
         _menuText =theMenuText;
         _closed = YES;

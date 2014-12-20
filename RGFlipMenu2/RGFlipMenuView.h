@@ -16,6 +16,8 @@
 - (instancetype)initWithFlipMenu:(RGFlipMenu *)theFlipMenu;
 
 - (void)flipMenu:(RGFlipMenu *)theFlipMenu;
+- (void)showMenuLabel;
+- (void)hideMenuLabel;
 - (void)repositionViews;
 
 @end
