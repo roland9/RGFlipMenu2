@@ -59,6 +59,14 @@
         [self.menuView hideMenuLabel];
 }
 
+- (void)setMenuType:(RGFlipMenuType)menuType {
+    _menuType = menuType;
+    // if we change the type to radioButtons, the menu itself finds the initially selected subMenu -> the first one
+    if (menuType == RGFlipMenuTypeRadioButtons) {
+        NSAssert([self.subMenus count]>1, @"need at least two subMenus to work with radio button type");
+        ((RGFlipMenu *)self.subMenus[0]).radioButtonSelected = YES;
+    }
+}
 // when we set the subMenus, ensure we set the superMenu to self
 - (void)setSubMenus:(NSArray *)subMenus {
     _subMenus = subMenus;
@@ -78,18 +86,17 @@
 
 - (void)handleTapMenu:(id)sender {
     
-    // toggle status
     self.closed = !self.isClosed;
     NSLog(@"main menu closed=%@", self.closed ? @"YES" : @"NO");
     
     [self updateSubMenus:self.subMenus closed:self.closed];
     
     [self.menuView flipMenu:self];
-
+    
     [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
         [self.menuView repositionViews];
     } completion:nil];
-
+    
     if (self.actionBlock) {
         self.actionBlock(self);
     }
@@ -98,24 +105,34 @@
 
 - (void)handleTapSubMenu:(RGFlipMenu *)theSubMenu {
     
-    // if no submenus to show: shrink and unshrink
-    if (!theSubMenu.subMenus) {
+    if (!theSubMenu.subMenus && theSubMenu.superMenu.menuType == RGFlipMenuTypeNormal) {
         
+        // we have no subMenus to show && typeNormal: shrink and unshrink this menu to visualize tap
         [self animateTapWithSubmenu:theSubMenu];
         // because this does not toggle, execute the action block every time
         if (theSubMenu.actionBlock) {
             theSubMenu.actionBlock(self);
         }
+
+    } else if (!theSubMenu.subMenus && theSubMenu.superMenu.menuType == RGFlipMenuTypeRadioButtons) {
+
+        // we have no subMenus to show && typeRadioButtons: all the menus on this level function as radio buttons: always one is active; selecting another subMenu unselects others
+        if (!theSubMenu.isRadioButtonSelected) {
+            theSubMenu.radioButtonSelected = YES;
+            [self unselectOtherSubMenusWithSubMenuNowSelected:theSubMenu];
+            [self animateRadioButtonWithMenu:theSubMenu];
+            if (theSubMenu.actionBlock) {
+                theSubMenu.actionBlock(self);
+            }
+        }
+
+    } else if (theSubMenu.subMenus && theSubMenu.superMenu.menuType == RGFlipMenuTypeNormal) {
         
-    } else {
-        
-        // we have submenus to show:
-        
-        // toggle status
+        // we have submenus to show && superMenu is type normal: open submenus & toggle status
         theSubMenu.closed = !theSubMenu.isClosed;
         
         [self updateSubMenus:theSubMenu.subMenus closed:theSubMenu.isClosed];
-
+        
         if (!theSubMenu.isClosed) {
             [self hideOtherSubMenusToShow:theSubMenu];
         } else {
@@ -123,21 +140,35 @@
         }
         
         [self.menuView flipMenu:theSubMenu];
-
+        
         // this subMenu toggles -> execute the action block only when opening
         if (!theSubMenu.isClosed && theSubMenu.actionBlock) {
             theSubMenu.actionBlock(self);
         }
-
+        
         [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
             [self.menuView repositionViews];
         } completion:nil];
         
+    } else {
+        NSAssert(NO, @"menuType / subMenus not implemented yet");
     }
+    
 }
 
 
 # pragma mark - Private
+
+- (void)unselectOtherSubMenusWithSubMenuNowSelected:(RGFlipMenu *)theSelectedMenu {
+    NSArray *allSubMenus = [theSelectedMenu.superMenu subMenus];
+    [allSubMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
+        if (subMenu != theSelectedMenu && subMenu.isRadioButtonSelected) {
+            subMenu.radioButtonSelected = NO;
+            [self animateRadioButtonWithMenu:subMenu];
+        }
+    }];
+}
+
 
 - (void)updateSubMenus:(NSArray *)theSubMenus closed:(BOOL)isClosed {
     [theSubMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
@@ -169,6 +200,17 @@
             subMenu.closed = YES;
             subMenu.hideToShowSibling = YES;
         }
+    }];
+}
+
+
+- (void)animateRadioButtonWithMenu:(RGFlipMenu *)theMenu {
+    [UIView animateWithDuration:0.1f animations:^{
+        if (theMenu.isRadioButtonSelected) {
+            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+        } else
+            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
+    } completion:^(BOOL finished) {
     }];
 }
 

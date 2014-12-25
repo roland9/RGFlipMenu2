@@ -63,6 +63,7 @@
         
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
+        NSAssert([self colorClass], @"expected color class");
         _menuFrontLabel.backgroundColor = [[self colorClass] performSelector:@selector(frontColor)];
         _menuFrontLabel.textColor = [[self colorClass] performSelector:@selector(frontTextColor)];
         _menuBackLabel.backgroundColor = [[self colorClass] performSelector:@selector(backColor)];
@@ -166,7 +167,7 @@
 # pragma mark - Private
 
 - (Class)colorClass {
-    return [self.flipMenu.rgFlipMenuColorClass class] ?: [self.flipMenu.superMenu.rgFlipMenuColorClass class];
+    return [self.flipMenu.flipMenuColorClass class] ?: [self.flipMenu.superMenu.flipMenuColorClass class];
 }
 
 
@@ -271,7 +272,10 @@
         
         subSubMenu.menuView.frame = CGRectMake(0, 0, kRGFlipMenuWidth, kRGFlipMenuHeight);
         subSubMenu.menuView.center = [self subSubMenuCenterWithIndex:theIndex maxIndex:theMaxIndex subMenuContainerView:subSubMenu.superMenu.menuView.subMenuContainerView];;
-        
+
+        if (subSubMenu.superMenu.menuType == RGFlipMenuTypeRadioButtons && subSubMenu.isRadioButtonSelected) {
+            subSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+        }
     }
 }
 
@@ -297,7 +301,6 @@
         subMenu.menuView.menuBackLabel.frame = subMenu.menuView.menuFrontLabel.frame;
 
     } else {
-
 
         // main menu is opened -> fan out subMenu and scale back to full size; if one of the subMenus is opened: hide others
         

@@ -25,6 +25,11 @@
 
 typedef void (^RGFlipMenuActionBlock)(id me);
 
+typedef NS_ENUM(NSInteger, RGFlipMenuType) {
+    RGFlipMenuTypeNormal,       // open submenus & toggle status
+    RGFlipMenuTypeRadioButtons  // all subMenus function as radio buttons: always one is active; selecting another subMenu unselects others
+};
+
 @class RGFlipMenuView, RGFlipMenu;
 
 @protocol RGFlipMenuTapProtocol <NSObject>
@@ -35,13 +40,15 @@ typedef void (^RGFlipMenuActionBlock)(id me);
 
 @interface RGFlipMenu : NSObject <RGFlipMenuTapProtocol>
 
-@property (nonatomic, weak) RGFlipMenu *superMenu;
-@property (nonatomic, strong) NSArray *subMenus;
+@property (nonatomic, weak)     RGFlipMenu *superMenu;
+@property (nonatomic, strong)   NSArray *subMenus;
 @property (nonatomic, readonly) RGFlipMenuView *menuView;
-@property (nonatomic, copy) NSString *menuText;
+@property (nonatomic, copy)     NSString *menuText;
+@property (nonatomic, assign)   RGFlipMenuType menuType;
 @property (nonatomic, assign, getter=isClosed) BOOL closed;
+@property (nonatomic, assign, getter=isRadioButtonSelected) BOOL radioButtonSelected;
 @property (nonatomic, assign, getter=isHiddenToShowSibling) BOOL hideToShowSibling;
-@property (nonatomic, copy) Class rgFlipMenuColorClass;
+@property (nonatomic, copy)     Class flipMenuColorClass;
 
 // instance with sub menus
 + (instancetype)createWithSubMenus:(NSArray *)theSubMenus menuText:(NSString *)theMenuText;
