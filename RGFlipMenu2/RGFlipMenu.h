@@ -14,6 +14,7 @@
 #define kRGFlipMenuBackScale 0.7f
 #define kRGAnimationDuration 0.6f
 #define kRGAnimationDamping  0.5f
+#define kRGAnimationVelocity 0.4f
 
 #define kRGFlipMenuWidth        150
 #define kRGFlipMenuHeight       150

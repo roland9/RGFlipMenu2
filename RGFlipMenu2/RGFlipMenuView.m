@@ -43,7 +43,7 @@
         
         
         _menuFrontLabel = [[UILabel alloc] init];
-        _menuFrontLabel.font = [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
+        _menuFrontLabel.font = [self normalFont];
         _menuFrontLabel.textAlignment = NSTextAlignmentCenter;
         _menuFrontLabel.text = theFlipMenu.menuText;
         _menuFrontLabel.numberOfLines = 2;
@@ -52,7 +52,7 @@
         [_menuWrapperView addSubview:_menuFrontLabel];
         
         _menuBackLabel = [[UILabel alloc] init];
-        _menuBackLabel.font = [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
+        _menuBackLabel.font = [self normalFont];
         _menuBackLabel.textAlignment = NSTextAlignmentCenter;
         _menuBackLabel.text = NSLocalizedString(@"Back\nin menu", @"Back in card backside menu");
         _menuBackLabel.numberOfLines = 2;
@@ -150,17 +150,6 @@
     if (!found) {
         [self.flipMenu popToRoot];
     }
-}
-
-- (void)hideMenuLabel {
-    self.menuFrontLabel.alpha = 0.f;
-    self.menuBackLabel.alpha = 1.f;
-}
-
-
-- (void)showMenuLabel {
-    self.menuFrontLabel.alpha = 1.f;
-    self.menuBackLabel.alpha = 0.f;
 }
 
 
@@ -275,6 +264,7 @@
 
         if (subSubMenu.superMenu.menuType == RGFlipMenuTypeRadioButtons && subSubMenu.isRadioButtonSelected) {
             subSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+            subSubMenu.menuView.menuFrontLabel.font = [self boldFont];
         }
     }
 }
@@ -329,6 +319,53 @@
         }
         
     }
+}
+
+- (UIFont *)normalFont {
+    return [UIFont fontWithName:@"HelveticaNeue-Thin" size:20];
+}
+
+- (UIFont *)boldFont {
+    return [UIFont fontWithName:@"HelveticaNeue" size:20];
+}
+
+# pragma mark - Public
+
+
+- (void)hideMenuLabel {
+    self.menuFrontLabel.alpha = 0.f;
+    self.menuBackLabel.alpha = 1.f;
+}
+
+
+- (void)showMenuLabel {
+    self.menuFrontLabel.alpha = 1.f;
+    self.menuBackLabel.alpha = 0.f;
+}
+
+
+- (void)animateRadioButtonWithRadioButtonSelected:(BOOL)isRadioButtonSelected {
+    [UIView animateWithDuration:0.1f delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:kRGAnimationVelocity options:UIViewAnimationOptionAllowAnimatedContent  animations:^{
+        if (isRadioButtonSelected) {
+            self.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+            self.menuFrontLabel.font = [self boldFont];
+        } else {
+            self.menuWrapperView.layer.transform = CATransform3DIdentity;
+            self.menuFrontLabel.font = [self normalFont];
+        }
+    } completion:nil];
+}
+
+
+- (void)animateTap {
+    [UIView animateWithDuration:0.1f delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:kRGAnimationVelocity options:UIViewAnimationOptionAllowAnimatedContent  animations:^{
+        self.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
+    } completion:^(BOOL finished) {
+        [UIView animateWithDuration:0.1f animations:^{
+            self.menuWrapperView.layer.transform = CATransform3DIdentity;
+        } completion:^(BOOL finished) {
+        }];
+    }];
 }
 
 

@@ -18,6 +18,8 @@
 - (void)flipMenu:(RGFlipMenu *)theFlipMenu;
 - (void)showMenuLabel;
 - (void)hideMenuLabel;
+- (void)animateRadioButtonWithRadioButtonSelected:(BOOL)isRadioButtonSelected;
+- (void)animateTap;
 - (void)repositionViews;
 
 @end

@@ -42,6 +42,7 @@
     }] != NSNotFound;
 }
 
+
 # pragma mark - Accessors
 
 - (RGFlipMenuView *)menuView {
@@ -67,6 +68,7 @@
         ((RGFlipMenu *)self.subMenus[0]).radioButtonSelected = YES;
     }
 }
+
 // when we set the subMenus, ensure we set the superMenu to self
 - (void)setSubMenus:(NSArray *)subMenus {
     _subMenus = subMenus;
@@ -87,13 +89,12 @@
 - (void)handleTapMenu:(id)sender {
     
     self.closed = !self.isClosed;
-    NSLog(@"main menu closed=%@", self.closed ? @"YES" : @"NO");
     
     [self updateSubMenus:self.subMenus closed:self.closed];
     
     [self.menuView flipMenu:self];
     
-    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
+    [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:kRGAnimationVelocity options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
         [self.menuView repositionViews];
     } completion:nil];
     
@@ -108,7 +109,8 @@
     if (!theSubMenu.subMenus && theSubMenu.superMenu.menuType == RGFlipMenuTypeNormal) {
         
         // we have no subMenus to show && typeNormal: shrink and unshrink this menu to visualize tap
-        [self animateTapWithSubmenu:theSubMenu];
+        [theSubMenu.menuView animateTap];
+
         // because this does not toggle, execute the action block every time
         if (theSubMenu.actionBlock) {
             theSubMenu.actionBlock(self);
@@ -120,7 +122,7 @@
         if (!theSubMenu.isRadioButtonSelected) {
             theSubMenu.radioButtonSelected = YES;
             [self unselectOtherSubMenusWithSubMenuNowSelected:theSubMenu];
-            [self animateRadioButtonWithMenu:theSubMenu];
+            [theSubMenu.menuView animateRadioButtonWithRadioButtonSelected:YES];
             if (theSubMenu.actionBlock) {
                 theSubMenu.actionBlock(self);
             }
@@ -146,7 +148,7 @@
             theSubMenu.actionBlock(self);
         }
         
-        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:0.4f options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
+        [UIView animateWithDuration:kRGAnimationDuration delay:0.f usingSpringWithDamping:kRGAnimationDamping initialSpringVelocity:kRGAnimationVelocity options:UIViewAnimationOptionAllowAnimatedContent | UIViewAnimationOptionBeginFromCurrentState animations:^{
             [self.menuView repositionViews];
         } completion:nil];
         
@@ -164,7 +166,7 @@
     [allSubMenus enumerateObjectsUsingBlock:^(RGFlipMenu *subMenu, NSUInteger idx, BOOL *stop) {
         if (subMenu != theSelectedMenu && subMenu.isRadioButtonSelected) {
             subMenu.radioButtonSelected = NO;
-            [self animateRadioButtonWithMenu:subMenu];
+            [subMenu.menuView animateRadioButtonWithRadioButtonSelected:NO];
         }
     }];
 }
@@ -200,29 +202,6 @@
             subMenu.closed = YES;
             subMenu.hideToShowSibling = YES;
         }
-    }];
-}
-
-
-- (void)animateRadioButtonWithMenu:(RGFlipMenu *)theMenu {
-    [UIView animateWithDuration:0.1f animations:^{
-        if (theMenu.isRadioButtonSelected) {
-            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
-        } else
-            theMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-    } completion:^(BOOL finished) {
-    }];
-}
-
-
-- (void)animateTapWithSubmenu:(RGFlipMenu *)theSubMenu {
-    [UIView animateWithDuration:0.1f animations:^{
-        theSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DMakeScale(0.8f, 0.8f, 0.8f);
-    } completion:^(BOOL finished) {
-        [UIView animateWithDuration:0.1f animations:^{
-            theSubMenu.menuView.menuWrapperView.layer.transform = CATransform3DIdentity;
-        } completion:^(BOOL finished) {
-        }];
     }];
 }
 
