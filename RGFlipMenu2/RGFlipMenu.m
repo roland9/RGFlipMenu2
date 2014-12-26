@@ -69,6 +69,14 @@
     }
 }
 
+- (void)setRadioButtonSelected:(BOOL)radioButtonSelected {
+    _radioButtonSelected = radioButtonSelected;
+    if (radioButtonSelected) {
+        [self unselectOtherSubMenusWithSubMenuNowSelected:self];
+    }
+}
+
+
 // when we set the subMenus, ensure we set the superMenu to self
 - (void)setSubMenus:(NSArray *)subMenus {
     _subMenus = subMenus;

@@ -54,7 +54,7 @@
         _menuBackLabel = [[UILabel alloc] init];
         _menuBackLabel.font = [self normalFont];
         _menuBackLabel.textAlignment = NSTextAlignmentCenter;
-        _menuBackLabel.text = NSLocalizedString(@"Back\nin menu", @"Back in card backside menu");
+        _menuBackLabel.text = NSLocalizedString(@"Back in menu", @"Back in card backside menu");
         _menuBackLabel.numberOfLines = 2;
         _menuBackLabel.userInteractionEnabled = NO;
         _menuBackLabel.layer.cornerRadius = 5.f;
@@ -161,6 +161,8 @@
 
 
 - (CGPoint)subSubMenuCenterWithIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex subMenuContainerView:(UIView *)subMenuContainerView {
+    BOOL isLastRowOrColumnAndOdd = (theMaxIndex%2 == 1 && theIndex>=theMaxIndex-1);
+
     NSUInteger maxIndex;
     if (theMaxIndex%2 == 1)
         maxIndex = theMaxIndex+1;
@@ -170,12 +172,12 @@
     if (isLandscape) {
         
         CGPoint subMenuCenter = CGPointMake(0 + subMenuContainerView.width/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.width/maxIndex*2.f),
-                                            subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
+                                            isLastRowOrColumnAndOdd ? subMenuContainerView.height*0.5f : subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
         return subMenuCenter;
         
     } else {
         
-        CGPoint subMenuCenter = CGPointMake(subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
+        CGPoint subMenuCenter = CGPointMake(isLastRowOrColumnAndOdd ? subMenuContainerView.width*0.5f : subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
                                             subMenuContainerView.height/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.height/maxIndex*2.f));
         return subMenuCenter;
     }
@@ -183,6 +185,8 @@
 
 
 - (CGPoint)subMenuCenterWithIndex:(NSUInteger)theIndex maxIndex:(NSUInteger)theMaxIndex subMenuContainerView:(UIView *)subMenuContainerView {
+    BOOL isLastRowOrColumnAndOdd = (theMaxIndex%2 == 1 && theIndex>=theMaxIndex-1);
+    
     NSUInteger maxIndex;
     if (theMaxIndex%2 == 1)
         maxIndex = theMaxIndex+1;
@@ -192,12 +196,12 @@
     if (isLandscape) {
         
         CGPoint subMenuCenter = CGPointMake(0 + subMenuContainerView.width/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.width/maxIndex*2.f),
-                                            subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
+                                            isLastRowOrColumnAndOdd ? subMenuContainerView.height*0.5f : subMenuContainerView.height*0.25f + subMenuContainerView.height*0.5f * (theIndex%2));
         return subMenuCenter;
         
     } else {
         
-        CGPoint subMenuCenter = CGPointMake(subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
+        CGPoint subMenuCenter = CGPointMake(isLastRowOrColumnAndOdd ? subMenuContainerView.width*0.5f : subMenuContainerView.width*0.25f + subMenuContainerView.width*0.5f * (theIndex%2),
                                             subMenuContainerView.height/maxIndex + floor(theIndex/2.f) * (subMenuContainerView.height/maxIndex*2.f));
         return subMenuCenter;
     }

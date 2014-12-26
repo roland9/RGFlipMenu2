@@ -53,24 +53,24 @@
                               [RGFlipMenu createWithActionBlock:^(id me) {
                                   NSLog(@"Suboption 3-3");
                               }  menuText:@"Suboption 3-3"],
-                              [RGFlipMenu createWithActionBlock:^(id me) {
-                                  NSLog(@"Suboption 3-4");
-                              }  menuText:@"Suboption 3-4"],
+//                              [RGFlipMenu createWithActionBlock:^(id me) {
+//                                  NSLog(@"Suboption 3-4");
+//                              }  menuText:@"Suboption 3-4"],
                               ];
-    NSArray *subSubMenus4 = @[
-                              [RGFlipMenu createWithActionBlock:^(id me) {
-                                  NSLog(@"Suboption 4-1");
-                              } menuText:@"Suboption 4-1"],
-                              [RGFlipMenu createWithActionBlock:^(id me) {
-                                  NSLog(@"Suboption 4-2");
-                              } menuText:@"Suboption 4-2"],
-                              [RGFlipMenu createWithActionBlock:^(id me) {
-                                  NSLog(@"Suboption 4-3");
-                              } menuText:@"Suboption 4-3"],
-                              [RGFlipMenu createWithActionBlock:^(id me) {
-                                  NSLog(@"Suboption 4-4");
-                              }  menuText:@"Suboption 4-4"],
-                              ];
+//    NSArray *subSubMenus4 = @[
+//                              [RGFlipMenu createWithActionBlock:^(id me) {
+//                                  NSLog(@"Suboption 4-1");
+//                              } menuText:@"Suboption 4-1"],
+//                              [RGFlipMenu createWithActionBlock:^(id me) {
+//                                  NSLog(@"Suboption 4-2");
+//                              } menuText:@"Suboption 4-2"],
+//                              [RGFlipMenu createWithActionBlock:^(id me) {
+//                                  NSLog(@"Suboption 4-3");
+//                              } menuText:@"Suboption 4-3"],
+//                              [RGFlipMenu createWithActionBlock:^(id me) {
+//                                  NSLog(@"Suboption 4-4");
+//                              }  menuText:@"Suboption 4-4"],
+//                              ];
     
     NSArray *subMenus = @[
                           [RGFlipMenu createWithActionBlock:^(id me) {
@@ -85,9 +85,9 @@
                               NSLog(@"tapped menu 3");
                           } menuText:@"Option 3"],
                           
-                          [RGFlipMenu createWithActionBlock:^(id me) {
-                              NSLog(@"tapped menu 4");
-                          } menuText:@"Option 4"],
+//                          [RGFlipMenu createWithActionBlock:^(id me) {
+//                              NSLog(@"tapped menu 4");
+//                          } menuText:@"Option 4"],
                           
                           ];
     
@@ -97,7 +97,7 @@
     // assign sub-sub menus
     ((RGFlipMenu *)self.flipMenu.subMenus[1]).subMenus = subSubMenus2;
     ((RGFlipMenu *)self.flipMenu.subMenus[2]).subMenus = subSubMenus3;
-    ((RGFlipMenu *)self.flipMenu.subMenus[3]).subMenus = subSubMenus4;
+//    ((RGFlipMenu *)self.flipMenu.subMenus[3]).subMenus = subSubMenus4;
 
     // assign colour classes to all menus to determine what colours are used (note BE and AE spelling here...)
     self.flipMenu.flipMenuColorClass = NSClassFromString(@"RGFlipMenuColors");
