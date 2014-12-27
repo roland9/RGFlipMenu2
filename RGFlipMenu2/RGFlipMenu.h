@@ -11,15 +11,16 @@
 
 #define isLandscape  (UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
 #define isIPad (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+#define isIPhone45  (MIN([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height)==320)
 #define kRGFlipMenuBackScale 0.7f
 #define kRGAnimationDuration 0.6f
 #define kRGAnimationDamping  0.5f
 #define kRGAnimationVelocity 0.4f
 
-#define kRGFlipMenuWidth        150
-#define kRGFlipMenuHeight       150
-#define kRGFlipSubMenuWidth     120
-#define kRGFlipSubMenuHeight    120
+#define kRGFlipMenuWidth        (isIPhone45 ? 130 : 150)
+#define kRGFlipMenuHeight       kRGFlipMenuWidth
+#define kRGFlipSubMenuWidth     (isIPhone45 ? 100 : 120)
+#define kRGFlipSubMenuHeight    kRGFlipSubMenuWidth
 
 #define kRGFlipMenuPadding      (isIPad ? 200.f : 30.f)
 #define kRGFlipSubMenuPadding   (isIPad ? 100.f : 60.f)
